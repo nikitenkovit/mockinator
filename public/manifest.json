@@ -1,0 +1,24 @@
+{
+	"manifest_version": 3,
+	"name": "Mockinator",
+	"version": "1.3.0",
+	"description": "Перехват fetch-запросов и возврат mock-данных.",
+	"permissions": ["storage", "scripting", "activeTab"],
+	"host_permissions": ["<all_urls>"],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"action": {
+		"default_popup": "popup.html",
+		"default_icon": {
+			"16": "assets/icon16.png",
+			"48": "assets/icon48.png",
+			"128": "assets/icon128.png"
+		}
+	},
+	"icons": {
+		"16": "assets/icon16.png",
+		"48": "assets/icon48.png",
+		"128": "assets/icon128.png"
+	}
+}
