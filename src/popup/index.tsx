@@ -12,12 +12,16 @@ const Popup: React.FC = () => {
 	const [rules, setRules] = useState<Rule[]>([
 		{ id: Date.now().toString(), path: '', data: '', isActive: false },
 	]);
+	const [isExtensionActive, setIsExtensionActive] = useState(false); // Состояние расширения (включено/выключено)
 
 	// Загрузка данных при открытии popup
 	useEffect(() => {
-		chrome.storage.local.get(['rules'], (result) => {
+		chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 			if (result.rules && result.rules.length > 0) {
 				setRules(result.rules);
+			}
+			if (result.isExtensionActive !== undefined) {
+				setIsExtensionActive(result.isExtensionActive);
 			}
 		});
 	}, []);
@@ -84,10 +88,42 @@ const Popup: React.FC = () => {
 		updateRules([initialRule]);
 	};
 
+	// Переключение состояния расширения
+	const toggleExtension = () => {
+		const newIsExtensionActive = !isExtensionActive;
+		setIsExtensionActive(newIsExtensionActive);
+
+		// Сохраняем состояние расширения в хранилище
+		chrome.storage.local.set(
+			{ isExtensionActive: newIsExtensionActive },
+			() => {
+				console.log('Состояние расширения обновлено:', newIsExtensionActive);
+
+				// Отправляем сообщение в фоновый скрипт
+				chrome.runtime.sendMessage({
+					action: newIsExtensionActive
+						? 'activateExtension'
+						: 'deactivateExtension',
+					rules,
+				});
+			}
+		);
+	};
+
 	return (
 		<div>
 			<h1>Mockinator</h1>
 			<p>Перехват fetch-запросов и возврат mock-данных.</p>
+
+			{/* Чекбокс для активации/деактивации расширения */}
+			<label>
+				Активировать расширение:
+				<input
+					type="checkbox"
+					checked={isExtensionActive}
+					onChange={toggleExtension}
+				/>
+			</label>
 
 			<ul style={{ listStyle: 'none', padding: 0 }}>
 				{rules.map((rule, index) => (
@@ -99,6 +135,7 @@ const Popup: React.FC = () => {
 								value={rule.path}
 								onChange={(e) => updateRule(rule.id, 'path', e.target.value)}
 								placeholder="Введите часть пути URL"
+								disabled={!isExtensionActive} // Блокировка, если расширение выключено
 							/>
 						</label>
 
@@ -108,6 +145,7 @@ const Popup: React.FC = () => {
 								value={rule.data}
 								onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
 								placeholder="Введите mock-данные"
+								disabled={!isExtensionActive} // Блокировка, если расширение выключено
 							/>
 						</label>
 
@@ -119,24 +157,37 @@ const Popup: React.FC = () => {
 								onChange={(e) =>
 									updateRule(rule.id, 'isActive', e.target.checked)
 								}
+								disabled={!isExtensionActive} // Блокировка, если расширение выключено
 							/>
 						</label>
 
 						{/* Кнопка для очистки полей ввода */}
-						<button onClick={() => clearRuleFields(rule.id)}>
+						<button
+							onClick={() => clearRuleFields(rule.id)}
+							disabled={!isExtensionActive} // Блокировка, если расширение выключено
+						>
 							Clear Fields
 						</button>
 
 						{/* Кнопка "Delete Rule" отображается, если это не последний элемент */}
 						{rules.length > 1 && (
-							<button onClick={() => deleteRule(rule.id)}>Delete Rule</button>
+							<button
+								onClick={() => deleteRule(rule.id)}
+								disabled={!isExtensionActive} // Блокировка, если расширение выключено
+							>
+								Delete Rule
+							</button>
 						)}
 					</li>
 				))}
 			</ul>
 
-			<button onClick={addRule}>Add Rule</button>
-			<button onClick={resetState}>Reset State</button>
+			<button onClick={addRule} disabled={!isExtensionActive}>
+				Add Rule
+			</button>
+			<button onClick={resetState} disabled={!isExtensionActive}>
+				Reset State
+			</button>
 		</div>
 	);
 };
