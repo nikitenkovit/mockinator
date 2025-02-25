@@ -8,7 +8,6 @@ interface Rule {
 }
 
 let rules: Rule[] = [];
-let isExtensionActive = false; // Глобальное состояние расширения
 
 // Расширяем интерфейс Window для добавления кастомных свойств
 declare global {
@@ -120,17 +119,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			console.log('Правила сохранены:', rules);
 
 			// Внедряем скрипт в активную вкладку, если расширение активно
-			if (isExtensionActive) {
-				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-					const tabId = tabs[0]?.id;
-					if (tabId) {
-						injectScript(rules, tabId);
-					}
-				});
-			}
+			chrome.storage.local.get(['isExtensionActive'], (result) => {
+				if (result.isExtensionActive) {
+					chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+						const tabId = tabs[0]?.id;
+						if (tabId) {
+							injectScript(rules, tabId);
+						}
+					});
+				}
+			});
 		});
 	} else if (message.action === 'activateExtension') {
-		isExtensionActive = true;
 		chrome.storage.local.set({ isExtensionActive: true }, () => {
 			if (chrome.runtime.lastError) {
 				console.error(
@@ -156,7 +156,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			});
 		});
 	} else if (message.action === 'deactivateExtension') {
-		isExtensionActive = false;
 		chrome.storage.local.set({ isExtensionActive: false }, () => {
 			if (chrome.runtime.lastError) {
 				console.error(
@@ -188,6 +187,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	}
 });
 
+// Отслеживание перехода на другую вкладку
+chrome.tabs.onActivated.addListener((activeInfo) => {
+	chrome.storage.local.set({ isExtensionActive: false }, () => {
+		console.log('Переход на другую вкладку, расширение деактивировано.');
+	});
+});
+
 // Загрузка данных при старте
 chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 	if (chrome.runtime.lastError) {
@@ -206,19 +212,5 @@ chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 	if (result.rules) {
 		rules = result.rules;
 		console.log('Правила загружены из хранилища:', rules);
-	}
-	if (result.isExtensionActive !== undefined) {
-		isExtensionActive = result.isExtensionActive;
-		console.log('Состояние расширения загружено:', isExtensionActive);
-
-		// Внедряем скрипт в активную вкладку, если расширение активно
-		if (isExtensionActive) {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				const tabId = tabs[0]?.id;
-				if (tabId) {
-					injectScript(rules, tabId);
-				}
-			});
-		}
 	}
 });
