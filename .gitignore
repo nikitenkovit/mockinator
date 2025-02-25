@@ -1,0 +1,12 @@
+# dependencies
+/node_modules
+
+# production
+/dist
+
+# misc
+.DS_Store
+*.pem
+
+# env files (can opt-in for commiting if needed)
+.env*
