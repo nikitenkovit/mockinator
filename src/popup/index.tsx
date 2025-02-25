@@ -13,7 +13,7 @@ const Popup: React.FC = () => {
 		{ id: Date.now().toString(), path: '', data: '', isActive: false },
 	]);
 	const [isExtensionActive, setIsExtensionActive] = useState(false); // Состояние расширения (включено/выключено)
-	const [error, setError] = useState<string | null>(null); // Состояние для хранения ошибки
+	const [error, setError] = useState<string | null>(null);
 
 	// Загрузка данных при открытии popup
 	useEffect(() => {
