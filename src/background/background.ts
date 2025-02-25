@@ -70,6 +70,9 @@ function restoreFetch(): void {
 // Внедрение скрипта в активную вкладку
 async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 	try {
+		console.log('Попытка внедрения скрипта на вкладку:', tabId);
+
+		// Внедряем основной скрипт
 		await chrome.scripting.executeScript({
 			target: { tabId },
 			func: overrideFetch,
@@ -79,6 +82,16 @@ async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 		console.log('Скрипт успешно внедрен на вкладку:', tabId);
 	} catch (error) {
 		console.error('Ошибка при внедрении скрипта:', error);
+
+		// Приводим error к типу Error и проверяем наличие свойства message
+		const errorMessage =
+			error instanceof Error ? error.message : 'Неизвестная ошибка';
+
+		// Отправляем сообщение об ошибке в popup
+		chrome.runtime.sendMessage({
+			action: 'error',
+			error: `Ошибка при внедрении скрипта: ${errorMessage}`,
+		});
 	}
 }
 
@@ -91,6 +104,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 		// Сохраняем правила в хранилище
 		chrome.storage.local.set({ rules }, () => {
+			if (chrome.runtime.lastError) {
+				console.error(
+					'Ошибка при сохранении правил:',
+					chrome.runtime.lastError.message
+				);
+				// Отправляем сообщение об ошибке в popup
+				chrome.runtime.sendMessage({
+					action: 'error',
+					error: `Ошибка при сохранении правил: ${chrome.runtime.lastError.message}`,
+				});
+				return;
+			}
+
 			console.log('Правила сохранены:', rules);
 
 			// Внедряем скрипт в активную вкладку, если расширение активно
@@ -106,6 +132,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	} else if (message.action === 'activateExtension') {
 		isExtensionActive = true;
 		chrome.storage.local.set({ isExtensionActive: true }, () => {
+			if (chrome.runtime.lastError) {
+				console.error(
+					'Ошибка при сохранении состояния расширения:',
+					chrome.runtime.lastError.message
+				);
+				// Отправляем сообщение об ошибке в popup
+				chrome.runtime.sendMessage({
+					action: 'error',
+					error: `Ошибка при сохранении состояния расширения: ${chrome.runtime.lastError.message}`,
+				});
+				return;
+			}
+
 			console.log('Расширение активировано.');
 
 			// Внедряем скрипт в активную вкладку
@@ -119,6 +158,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	} else if (message.action === 'deactivateExtension') {
 		isExtensionActive = false;
 		chrome.storage.local.set({ isExtensionActive: false }, () => {
+			if (chrome.runtime.lastError) {
+				console.error(
+					'Ошибка при сохранении состояния расширения:',
+					chrome.runtime.lastError.message
+				);
+				// Отправляем сообщение об ошибке в popup
+				chrome.runtime.sendMessage({
+					action: 'error',
+					error: `Ошибка при сохранении состояния расширения: ${chrome.runtime.lastError.message}`,
+				});
+				return;
+			}
+
 			console.log('Расширение деактивировано.');
 
 			// Восстанавливаем оригинальный fetch в активной вкладке
@@ -138,6 +190,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Загрузка данных при старте
 chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
+	if (chrome.runtime.lastError) {
+		console.error(
+			'Ошибка при загрузке данных:',
+			chrome.runtime.lastError.message
+		);
+		// Отправляем сообщение об ошибке в popup
+		chrome.runtime.sendMessage({
+			action: 'error',
+			error: `Ошибка при загрузке данных: ${chrome.runtime.lastError.message}`,
+		});
+		return;
+	}
+
 	if (result.rules) {
 		rules = result.rules;
 		console.log('Правила загружены из хранилища:', rules);
