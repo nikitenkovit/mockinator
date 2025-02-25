@@ -63,13 +63,34 @@ const Popup: React.FC = () => {
 		updateRules(newRules);
 	};
 
+	// Очистка полей ввода для конкретного правила
+	const clearRuleFields = (id: string) => {
+		const newRules = rules.map((rule) =>
+			rule.id === id ? { ...rule, path: '', data: '', isActive: false } : rule
+		);
+		setRules(newRules);
+		updateRules(newRules);
+	};
+
+	// Сброс всего состояния до первоначального
+	const resetState = () => {
+		const initialRule: Rule = {
+			id: Date.now().toString(),
+			path: '',
+			data: '',
+			isActive: false,
+		};
+		setRules([initialRule]);
+		updateRules([initialRule]);
+	};
+
 	return (
 		<div>
 			<h1>Mockinator</h1>
 			<p>Перехват fetch-запросов и возврат mock-данных.</p>
 
 			<ul style={{ listStyle: 'none', padding: 0 }}>
-				{rules.map((rule) => (
+				{rules.map((rule, index) => (
 					<li key={rule.id} style={{ marginBottom: '10px' }}>
 						<label>
 							PATH:
@@ -101,6 +122,11 @@ const Popup: React.FC = () => {
 							/>
 						</label>
 
+						{/* Кнопка для очистки полей ввода */}
+						<button onClick={() => clearRuleFields(rule.id)}>
+							Clear Fields
+						</button>
+
 						{/* Кнопка "Delete Rule" отображается, если это не последний элемент */}
 						{rules.length > 1 && (
 							<button onClick={() => deleteRule(rule.id)}>Delete Rule</button>
@@ -110,6 +136,7 @@ const Popup: React.FC = () => {
 			</ul>
 
 			<button onClick={addRule}>Add Rule</button>
+			<button onClick={resetState}>Reset State</button>
 		</div>
 	);
 };
