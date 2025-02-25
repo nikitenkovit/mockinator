@@ -8,6 +8,7 @@ interface Rule {
 }
 
 let rules: Rule[] = [];
+let isExtensionActive = false; // Глобальное состояние расширения
 
 // Расширяем интерфейс Window для добавления кастомных свойств
 declare global {
@@ -56,6 +57,16 @@ function overrideFetch(rules: Rule[]): void {
 	console.log('Перехват fetch-запросов активирован.');
 }
 
+// Функция для восстановления оригинального fetch
+function restoreFetch(): void {
+	if (window.originalFetch) {
+		window.fetch = window.originalFetch;
+		console.log('Оригинальный fetch восстановлен.');
+	} else {
+		console.log('Оригинальный fetch не найден.');
+	}
+}
+
 // Внедрение скрипта в активную вкладку
 async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 	try {
@@ -82,11 +93,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		chrome.storage.local.set({ rules }, () => {
 			console.log('Правила сохранены:', rules);
 
+			// Внедряем скрипт в активную вкладку, если расширение активно
+			if (isExtensionActive) {
+				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+					const tabId = tabs[0]?.id;
+					if (tabId) {
+						injectScript(rules, tabId);
+					}
+				});
+			}
+		});
+	} else if (message.action === 'activateExtension') {
+		isExtensionActive = true;
+		chrome.storage.local.set({ isExtensionActive: true }, () => {
+			console.log('Расширение активировано.');
+
 			// Внедряем скрипт в активную вкладку
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
 				if (tabId) {
-					injectScript(rules, tabId);
+					injectScript(message.rules, tabId);
+				}
+			});
+		});
+	} else if (message.action === 'deactivateExtension') {
+		isExtensionActive = false;
+		chrome.storage.local.set({ isExtensionActive: false }, () => {
+			console.log('Расширение деактивировано.');
+
+			// Восстанавливаем оригинальный fetch в активной вкладке
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				const tabId = tabs[0]?.id;
+				if (tabId) {
+					chrome.scripting.executeScript({
+						target: { tabId },
+						func: restoreFetch,
+						world: 'MAIN',
+					});
 				}
 			});
 		});
@@ -94,17 +137,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Загрузка данных при старте
-chrome.storage.local.get(['rules'], (result) => {
+chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 	if (result.rules) {
 		rules = result.rules;
 		console.log('Правила загружены из хранилища:', rules);
+	}
+	if (result.isExtensionActive !== undefined) {
+		isExtensionActive = result.isExtensionActive;
+		console.log('Состояние расширения загружено:', isExtensionActive);
 
-		// Внедряем скрипт в активную вкладку
-		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			const tabId = tabs[0]?.id;
-			if (tabId) {
-				injectScript(rules, tabId);
-			}
-		});
+		// Внедряем скрипт в активную вкладку, если расширение активно
+		if (isExtensionActive) {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				const tabId = tabs[0]?.id;
+				if (tabId) {
+					injectScript(rules, tabId);
+				}
+			});
+		}
 	}
 });
