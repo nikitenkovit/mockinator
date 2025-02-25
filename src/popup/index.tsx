@@ -13,10 +13,18 @@ const Popup: React.FC = () => {
 		{ id: Date.now().toString(), path: '', data: '', isActive: false },
 	]);
 	const [isExtensionActive, setIsExtensionActive] = useState(false); // Состояние расширения (включено/выключено)
+	const [error, setError] = useState<string | null>(null); // Состояние для хранения ошибки
 
 	// Загрузка данных при открытии popup
 	useEffect(() => {
 		chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
+			if (chrome.runtime.lastError) {
+				setError(
+					`Ошибка при загрузке данных: ${chrome.runtime.lastError.message}`
+				);
+				return;
+			}
+
 			if (result.rules && result.rules.length > 0) {
 				setRules(result.rules);
 			}
@@ -24,11 +32,25 @@ const Popup: React.FC = () => {
 				setIsExtensionActive(result.isExtensionActive);
 			}
 		});
+
+		// Слушаем сообщения об ошибках из background.ts
+		chrome.runtime.onMessage.addListener((message) => {
+			if (message.action === 'error') {
+				setError(message.error);
+			}
+		});
 	}, []);
 
 	// Обновление правил в хранилище
 	const updateRules = (newRules: Rule[]) => {
 		chrome.storage.local.set({ rules: newRules }, () => {
+			if (chrome.runtime.lastError) {
+				setError(
+					`Ошибка при сохранении правил: ${chrome.runtime.lastError.message}`
+				);
+				return;
+			}
+
 			console.log('Правила обновлены:', newRules);
 			chrome.runtime.sendMessage({ action: 'updateRules', rules: newRules });
 		});
@@ -97,6 +119,13 @@ const Popup: React.FC = () => {
 		chrome.storage.local.set(
 			{ isExtensionActive: newIsExtensionActive },
 			() => {
+				if (chrome.runtime.lastError) {
+					setError(
+						`Ошибка при сохранении состояния расширения: ${chrome.runtime.lastError.message}`
+					);
+					return;
+				}
+
 				console.log('Состояние расширения обновлено:', newIsExtensionActive);
 
 				// Отправляем сообщение в фоновый скрипт
@@ -114,6 +143,13 @@ const Popup: React.FC = () => {
 		<div>
 			<h1>Mockinator</h1>
 			<p>Перехват fetch-запросов и возврат mock-данных.</p>
+
+			{/* Отображение ошибки */}
+			{error && (
+				<div style={{ color: 'red', marginBottom: '10px' }}>
+					Ошибка: {error}
+				</div>
+			)}
 
 			{/* Чекбокс для активации/деактивации расширения */}
 			<label>
@@ -135,7 +171,7 @@ const Popup: React.FC = () => {
 								value={rule.path}
 								onChange={(e) => updateRule(rule.id, 'path', e.target.value)}
 								placeholder="Введите часть пути URL"
-								disabled={!isExtensionActive} // Блокировка, если расширение выключено
+								disabled={!isExtensionActive}
 							/>
 						</label>
 
@@ -145,7 +181,7 @@ const Popup: React.FC = () => {
 								value={rule.data}
 								onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
 								placeholder="Введите mock-данные"
-								disabled={!isExtensionActive} // Блокировка, если расширение выключено
+								disabled={!isExtensionActive}
 							/>
 						</label>
 
@@ -157,14 +193,14 @@ const Popup: React.FC = () => {
 								onChange={(e) =>
 									updateRule(rule.id, 'isActive', e.target.checked)
 								}
-								disabled={!isExtensionActive} // Блокировка, если расширение выключено
+								disabled={!isExtensionActive}
 							/>
 						</label>
 
 						{/* Кнопка для очистки полей ввода */}
 						<button
 							onClick={() => clearRuleFields(rule.id)}
-							disabled={!isExtensionActive} // Блокировка, если расширение выключено
+							disabled={!isExtensionActive}
 						>
 							Clear Fields
 						</button>
@@ -173,7 +209,7 @@ const Popup: React.FC = () => {
 						{rules.length > 1 && (
 							<button
 								onClick={() => deleteRule(rule.id)}
-								disabled={!isExtensionActive} // Блокировка, если расширение выключено
+								disabled={!isExtensionActive}
 							>
 								Delete Rule
 							</button>
