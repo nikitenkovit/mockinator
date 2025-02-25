@@ -94,6 +94,35 @@ async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 	}
 }
 
+// Функция для обновления иконки расширения
+function updateIcon(isExtensionActive: boolean) {
+	const iconPath = isExtensionActive
+		? {
+				16: 'assets/icons/active/icon16.png',
+				48: 'assets/icons/active/icon48.png',
+				128: 'assets/icons/active/icon128.png',
+		  }
+		: {
+				16: 'assets/icons/inactive/icon16.png',
+				48: 'assets/icons/inactive/icon48.png',
+				128: 'assets/icons/inactive/icon128.png',
+		  };
+
+	chrome.action.setIcon({ path: iconPath }, () => {
+		if (chrome.runtime.lastError) {
+			console.error(
+				'Ошибка при обновлении иконки:',
+				chrome.runtime.lastError.message
+			);
+		} else {
+			console.log(
+				'Иконка обновлена:',
+				isExtensionActive ? 'активная' : 'неактивная'
+			);
+		}
+	});
+}
+
 // Обработка сообщений от popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	console.log('Получено сообщение:', message);
@@ -108,11 +137,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 					'Ошибка при сохранении правил:',
 					chrome.runtime.lastError.message
 				);
-				// Отправляем сообщение об ошибке в popup
-				chrome.runtime.sendMessage({
-					action: 'error',
-					error: `Ошибка при сохранении правил: ${chrome.runtime.lastError.message}`,
-				});
 				return;
 			}
 
@@ -137,15 +161,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 					'Ошибка при сохранении состояния расширения:',
 					chrome.runtime.lastError.message
 				);
-				// Отправляем сообщение об ошибке в popup
-				chrome.runtime.sendMessage({
-					action: 'error',
-					error: `Ошибка при сохранении состояния расширения: ${chrome.runtime.lastError.message}`,
-				});
 				return;
 			}
 
 			console.log('Расширение активировано.');
+
+			// Обновляем иконку
+			updateIcon(true);
 
 			// Внедряем скрипт в активную вкладку
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -162,15 +184,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 					'Ошибка при сохранении состояния расширения:',
 					chrome.runtime.lastError.message
 				);
-				// Отправляем сообщение об ошибке в popup
-				chrome.runtime.sendMessage({
-					action: 'error',
-					error: `Ошибка при сохранении состояния расширения: ${chrome.runtime.lastError.message}`,
-				});
 				return;
 			}
 
 			console.log('Расширение деактивировано.');
+
+			// Обновляем иконку
+			updateIcon(false);
 
 			// Восстанавливаем оригинальный fetch в активной вкладке
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -191,6 +211,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 chrome.tabs.onActivated.addListener((activeInfo) => {
 	chrome.storage.local.set({ isExtensionActive: false }, () => {
 		console.log('Переход на другую вкладку, расширение деактивировано.');
+
+		// Обновляем иконку
+		updateIcon(false);
 	});
 });
 
@@ -201,16 +224,28 @@ chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 			'Ошибка при загрузке данных:',
 			chrome.runtime.lastError.message
 		);
-		// Отправляем сообщение об ошибке в popup
-		chrome.runtime.sendMessage({
-			action: 'error',
-			error: `Ошибка при загрузке данных: ${chrome.runtime.lastError.message}`,
-		});
 		return;
 	}
 
 	if (result.rules) {
 		rules = result.rules;
 		console.log('Правила загружены из хранилища:', rules);
+	}
+
+	if (result.isExtensionActive !== undefined) {
+		console.log('Состояние расширения загружено:', result.isExtensionActive);
+
+		// Обновляем иконку при загрузке
+		updateIcon(result.isExtensionActive);
+
+		// Внедряем скрипт в активную вкладку, если расширение активно
+		if (result.isExtensionActive) {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				const tabId = tabs[0]?.id;
+				if (tabId) {
+					injectScript(rules, tabId);
+				}
+			});
+		}
 	}
 });
