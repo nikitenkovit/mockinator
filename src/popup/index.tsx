@@ -1,88 +1,115 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 
+interface Rule {
+	id: string;
+	path: string;
+	data: string;
+	isActive: boolean;
+}
+
 const Popup: React.FC = () => {
-	const [path, setPath] = useState('');
-	const [data, setData] = useState('');
-	const [isActive, setIsActive] = useState(false);
+	const [rules, setRules] = useState<Rule[]>([
+		{ id: Date.now().toString(), path: '', data: '', isActive: false },
+	]);
 
 	// Загрузка данных при открытии popup
 	useEffect(() => {
-		chrome.storage.local.get(['path', 'data', 'isActive'], (result) => {
-			setPath(result.path || '');
-			setData(result.data || '');
-			setIsActive(result.isActive || false);
-			console.log('Данные загружены в popup:', result);
+		chrome.storage.local.get(['rules'], (result) => {
+			if (result.rules && result.rules.length > 0) {
+				setRules(result.rules);
+			}
 		});
 	}, []);
 
-	// Переключение состояния перехвата
-	const toggleIntercept = () => {
-		const newIsActive = !isActive;
-		setIsActive(newIsActive);
-
-		// Сохраняем данные в хранилище
-		chrome.storage.local.set({ path, data, isActive: newIsActive }, () => {
-			console.log('Данные сохранены в хранилище:', {
-				path,
-				data,
-				isActive: newIsActive,
-			});
-
-			// Отправляем сообщение в фоновый скрипт
-			chrome.runtime.sendMessage({
-				action: newIsActive ? 'activate' : 'deactivate',
-				path,
-				data,
-			});
+	// Обновление правил в хранилище
+	const updateRules = (newRules: Rule[]) => {
+		chrome.storage.local.set({ rules: newRules }, () => {
+			console.log('Правила обновлены:', newRules);
+			chrome.runtime.sendMessage({ action: 'updateRules', rules: newRules });
 		});
 	};
 
-	// Синхронизация состояния при изменении хранилища
-	useEffect(() => {
-		const listener = (
-			changes: { [key: string]: chrome.storage.StorageChange },
-			area: string
-		) => {
-			if (area === 'local' && changes.isActive) {
-				const newIsActive = changes.isActive.newValue;
-				setIsActive(newIsActive);
-				console.log('Состояние isActive изменено в хранилище:', newIsActive);
-			}
+	// Добавление нового правила
+	const addRule = () => {
+		const newRule: Rule = {
+			id: Date.now().toString(),
+			path: '',
+			data: '',
+			isActive: false,
 		};
+		const newRules = [...rules, newRule];
+		setRules(newRules);
+		updateRules(newRules);
+	};
 
-		chrome.storage.onChanged.addListener(listener);
-		return () => chrome.storage.onChanged.removeListener(listener);
-	}, []);
+	// Удаление правила
+	const deleteRule = (id: string) => {
+		const newRules = rules.filter((rule) => rule.id !== id);
+		setRules(newRules);
+		updateRules(newRules);
+	};
+
+	// Обновление отдельного правила
+	const updateRule = (
+		id: string,
+		field: keyof Rule,
+		value: string | boolean
+	) => {
+		const newRules = rules.map((rule) =>
+			rule.id === id ? { ...rule, [field]: value } : rule
+		);
+		setRules(newRules);
+		updateRules(newRules);
+	};
 
 	return (
 		<div>
 			<h1>Mockinator</h1>
 			<p>Перехват fetch-запросов и возврат mock-данных.</p>
 
-			<label>
-				PATH:
-				<input
-					type="text"
-					value={path}
-					onChange={(e) => setPath(e.target.value)}
-					placeholder="Введите часть пути URL"
-				/>
-			</label>
+			<ul style={{ listStyle: 'none', padding: 0 }}>
+				{rules.map((rule) => (
+					<li key={rule.id} style={{ marginBottom: '10px' }}>
+						<label>
+							PATH:
+							<input
+								type="text"
+								value={rule.path}
+								onChange={(e) => updateRule(rule.id, 'path', e.target.value)}
+								placeholder="Введите часть пути URL"
+							/>
+						</label>
 
-			<label>
-				DATA:
-				<textarea
-					value={data}
-					onChange={(e) => setData(e.target.value)}
-					placeholder="Введите mock-данные"
-				/>
-			</label>
+						<label>
+							DATA:
+							<textarea
+								value={rule.data}
+								onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
+								placeholder="Введите mock-данные"
+							/>
+						</label>
 
-			<label>
-				Активировать перехват:
-				<input type="checkbox" checked={isActive} onChange={toggleIntercept} />
-			</label>
+						<label>
+							Активировать перехват:
+							<input
+								type="checkbox"
+								checked={rule.isActive}
+								onChange={(e) =>
+									updateRule(rule.id, 'isActive', e.target.checked)
+								}
+							/>
+						</label>
+
+						{/* Кнопка "Delete Rule" отображается, если это не последний элемент */}
+						{rules.length > 1 && (
+							<button onClick={() => deleteRule(rule.id)}>Delete Rule</button>
+						)}
+					</li>
+				))}
+			</ul>
+
+			<button onClick={addRule}>Add Rule</button>
 		</div>
 	);
 };
@@ -90,5 +117,4 @@ const Popup: React.FC = () => {
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
-
 root.render(<Popup />);
