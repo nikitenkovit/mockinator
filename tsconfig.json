@@ -8,6 +8,6 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"moduleResolution": "NodeNext",
-		"types": ["chrome", "vite/client"]
+		"types": ["vite/client"]
 	}
 }

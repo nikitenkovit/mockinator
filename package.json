@@ -3,23 +3,21 @@
 	"version": "1.0.0",
 	"scripts": {
 		"dev": "vite build --watch --mode development",
-		"build": "vite build --mode production",
-		"serve": "vite preview"
+		"build": "vite build --mode production"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
-		"@types/react": "^19.0.10",
-		"@types/react-dom": "^19.0.4",
-		"@vitejs/plugin-react": "^4.3.4",
+		"@vitejs/plugin-react": "4.3.4",
 		"react": "19.0.0",
 		"react-dom": "19.0.0",
-		"typescript": "^5.7.3",
-		"vite": "^6.1.1"
+		"typescript": "5.7.3",
+		"vite": "6.1.1"
 	},
 	"devDependencies": {
-		"@types/chrome": "^0.0.306"
+		"@types/react": "18.2.0",
+		"@types/react-dom": "18.2.0"
 	}
 }
