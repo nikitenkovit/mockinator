@@ -1,5 +1,13 @@
 console.log('Фоновый скрипт загружен.');
 
+/*
+ * Интерфейс для описания правил перехвата запросов.
+ * Каждое правило содержит:
+ * - id: Уникальный идентификатор правила.
+ * - path: Часть URL, которую нужно перехватывать.
+ * - data: Mock-данные, которые будут возвращены вместо реального ответа.
+ * - isActive: Флаг, указывающий, активно ли правило.
+ */
 interface Rule {
 	id: string;
 	path: string;
@@ -7,28 +15,39 @@ interface Rule {
 	isActive: boolean;
 }
 
+// Глобальный массив для хранения правил перехвата запросов.
 let rules: Rule[] = [];
 
-// Расширяем интерфейс Window для добавления кастомных свойств
+/*
+ * Расширение глобального интерфейса Window для добавления кастомного свойства originalFetch.
+ * Это свойство будет хранить оригинальную реализацию функции fetch.
+ */
 declare global {
 	interface Window {
 		originalFetch: typeof fetch;
 	}
 }
 
-// Функция для переопределения fetch
+/*
+ * Функция для переопределения глобальной функции fetch.
+ * Перехватывает все fetch-запросы и возвращает mock-данные, если URL соответствует одному из активных правил.
+ * @param rules - Массив правил для перехвата запросов.
+ */
 function overrideFetch(rules: Rule[]): void {
 	console.log('Переопределение fetch начато.');
 
+	// Сохраняем оригинальную реализацию fetch, если она еще не сохранена.
 	if (!window.originalFetch) {
 		window.originalFetch = window.fetch;
 		console.log('Оригинальный fetch сохранен.');
 	}
 
+	// Переопределяем глобальную функцию fetch.
 	window.fetch = async (
 		input: RequestInfo | URL,
 		init?: RequestInit
 	): Promise<Response> => {
+		// Получаем URL из входных данных.
 		const url =
 			typeof input === 'string'
 				? input
@@ -37,11 +56,13 @@ function overrideFetch(rules: Rule[]): void {
 				: input.url;
 		console.log('Обнаружен fetch-запрос:', url);
 
-		// Проверяем все активные правила
+		// Проверяем все активные правила.
 		for (const rule of rules) {
 			if (rule.isActive && rule.path && url.includes(rule.path)) {
 				console.log('Перехвачен запрос:', url);
 				console.log('Возвращаем mock-данные:', rule.data);
+
+				// Возвращаем mock-данные в виде Response.
 				return new Response(rule.data, {
 					status: 200,
 					headers: { 'Content-Type': 'application/json' },
@@ -49,6 +70,7 @@ function overrideFetch(rules: Rule[]): void {
 			}
 		}
 
+		// Если правило не найдено, выполняем оригинальный fetch.
 		console.log('Запрос не перехвачен, выполняется оригинальный fetch.');
 		return window.originalFetch(input, init);
 	};
@@ -56,7 +78,10 @@ function overrideFetch(rules: Rule[]): void {
 	console.log('Перехват fetch-запросов активирован.');
 }
 
-// Функция для восстановления оригинального fetch
+/*
+ * Функция для восстановления оригинальной реализации fetch.
+ * Используется при деактивации расширения.
+ */
 function restoreFetch(): void {
 	if (window.originalFetch) {
 		window.fetch = window.originalFetch;
@@ -66,12 +91,17 @@ function restoreFetch(): void {
 	}
 }
 
-// Внедрение скрипта в активную вкладку
+/*
+ * Функция для внедрения скрипта в активную вкладку.
+ * Внедряет функцию overrideFetch в контекст активной вкладки.
+ * @param rules - Массив правил для перехвата запросов.
+ * @param tabId - Идентификатор вкладки, в которую нужно внедрить скрипт.
+ */
 async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 	try {
 		console.log('Попытка внедрения скрипта на вкладку:', tabId);
 
-		// Внедряем основной скрипт
+		// Внедряем скрипт с помощью chrome.scripting.executeScript.
 		await chrome.scripting.executeScript({
 			target: { tabId },
 			func: overrideFetch,
@@ -82,11 +112,10 @@ async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 	} catch (error) {
 		console.error('Ошибка при внедрении скрипта:', error);
 
-		// Приводим error к типу Error и проверяем наличие свойства message
+		// Преобразуем ошибку в строку и отправляем сообщение об ошибке в popup.
 		const errorMessage =
 			error instanceof Error ? error.message : 'Неизвестная ошибка';
 
-		// Отправляем сообщение об ошибке в popup
 		chrome.runtime.sendMessage({
 			action: 'error',
 			error: `Ошибка при внедрении скрипта: ${errorMessage}`,
@@ -94,7 +123,11 @@ async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 	}
 }
 
-// Функция для обновления иконки расширения
+/*
+ * Функция для обновления иконки расширения.
+ * Меняет иконку в зависимости от состояния расширения (активно/неактивно).
+ * @param isExtensionActive - Флаг, указывающий, активно ли расширение.
+ */
 function updateIcon(isExtensionActive: boolean) {
 	const iconPath = isExtensionActive
 		? {
@@ -108,6 +141,7 @@ function updateIcon(isExtensionActive: boolean) {
 				128: 'assets/icons/inactive/icon128.png',
 		  };
 
+	// Устанавливаем новую иконку.
 	chrome.action.setIcon({ path: iconPath }, () => {
 		if (chrome.runtime.lastError) {
 			console.error(
@@ -123,14 +157,17 @@ function updateIcon(isExtensionActive: boolean) {
 	});
 }
 
-// Обработка сообщений от popup
+/*
+ * Обработчик сообщений от popup.
+ * Реагирует на сообщения с действиями: обновление правил, активация/деактивация расширения.
+ */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	console.log('Получено сообщение:', message);
 
 	if (message.action === 'updateRules') {
+		// Обновляем правила и сохраняем их в хранилище.
 		rules = message.rules;
 
-		// Сохраняем правила в хранилище
 		chrome.storage.local.set({ rules }, () => {
 			if (chrome.runtime.lastError) {
 				console.error(
@@ -142,7 +179,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 			console.log('Правила сохранены:', rules);
 
-			// Внедряем скрипт в активную вкладку, если расширение активно
+			// Внедряем скрипт в активную вкладку, если расширение активно.
 			chrome.storage.local.get(['isExtensionActive'], (result) => {
 				if (result.isExtensionActive) {
 					chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -155,6 +192,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			});
 		});
 	} else if (message.action === 'activateExtension') {
+		// Активируем расширение и обновляем иконку.
 		chrome.storage.local.set({ isExtensionActive: true }, () => {
 			if (chrome.runtime.lastError) {
 				console.error(
@@ -166,10 +204,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 			console.log('Расширение активировано.');
 
-			// Обновляем иконку
 			updateIcon(true);
 
-			// Внедряем скрипт в активную вкладку
+			// Внедряем скрипт в активную вкладку.
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
 				if (tabId) {
@@ -178,6 +215,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			});
 		});
 	} else if (message.action === 'deactivateExtension') {
+		// Деактивируем расширение и восстанавливаем оригинальный fetch.
 		chrome.storage.local.set({ isExtensionActive: false }, () => {
 			if (chrome.runtime.lastError) {
 				console.error(
@@ -189,10 +227,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 			console.log('Расширение деактивировано.');
 
-			// Обновляем иконку
 			updateIcon(false);
 
-			// Восстанавливаем оригинальный fetch в активной вкладке
+			// Восстанавливаем оригинальный fetch в активной вкладке.
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
 				if (tabId) {
@@ -207,17 +244,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	}
 });
 
-// Отслеживание перехода на другую вкладку
+/*
+ * Обработчик события перехода на другую вкладку.
+ * Деактивирует расширение при смене вкладки.
+ */
 chrome.tabs.onActivated.addListener((activeInfo) => {
 	chrome.storage.local.set({ isExtensionActive: false }, () => {
 		console.log('Переход на другую вкладку, расширение деактивировано.');
 
-		// Обновляем иконку
+		// Обновляем иконку.
 		updateIcon(false);
 	});
 });
 
-// Загрузка данных при старте
+/*
+ * Загрузка данных при старте расширения.
+ * Восстанавливает правила и состояние расширения из хранилища.
+ */
 chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 	if (chrome.runtime.lastError) {
 		console.error(
@@ -227,18 +270,20 @@ chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 		return;
 	}
 
+	// Восстанавливаем правила.
 	if (result.rules) {
 		rules = result.rules;
 		console.log('Правила загружены из хранилища:', rules);
 	}
 
+	// Восстанавливаем состояние расширения.
 	if (result.isExtensionActive !== undefined) {
 		console.log('Состояние расширения загружено:', result.isExtensionActive);
 
-		// Обновляем иконку при загрузке
+		// Обновляем иконку.
 		updateIcon(result.isExtensionActive);
 
-		// Внедряем скрипт в активную вкладку, если расширение активно
+		// Внедряем скрипт в активную вкладку, если расширение активно.
 		if (result.isExtensionActive) {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
