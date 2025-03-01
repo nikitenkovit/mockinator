@@ -4,9 +4,12 @@ import ReactDOM from 'react-dom/client';
 interface Rule {
 	id: string;
 	path: string;
-	data: string;
+	data?: string;
 	isActive: boolean;
 	delay?: number;
+	responseType: 'success' | 'error' | 'redirect';
+	errorMessage?: string;
+	redirectUrl?: string;
 }
 
 const Popup: React.FC = () => {
@@ -17,6 +20,9 @@ const Popup: React.FC = () => {
 			data: '',
 			isActive: false,
 			delay: 0,
+			responseType: 'success',
+			errorMessage: 'Bad Request',
+			redirectUrl: 'http://',
 		},
 	]);
 	const [isExtensionActive, setIsExtensionActive] = useState(false);
@@ -71,6 +77,9 @@ const Popup: React.FC = () => {
 			data: '',
 			isActive: false,
 			delay: 0,
+			responseType: 'success',
+			errorMessage: 'Bad Request',
+			redirectUrl: 'http://',
 		};
 		const newRules = [...rules, newRule];
 		setRules(newRules);
@@ -101,7 +110,16 @@ const Popup: React.FC = () => {
 	const clearRuleFields = (id: string) => {
 		const newRules = rules.map((rule) =>
 			rule.id === id
-				? { ...rule, path: '', data: '', delay: 0, isActive: false }
+				? {
+						...rule,
+						path: '',
+						data: '',
+						delay: 0,
+						isActive: false,
+						responseType: 'success' as const,
+						errorMessage: 'Bad Request',
+						redirectUrl: 'http://',
+				  }
 				: rule
 		);
 		setRules(newRules);
@@ -116,6 +134,9 @@ const Popup: React.FC = () => {
 			data: '',
 			isActive: false,
 			delay: 0,
+			responseType: 'success',
+			errorMessage: 'Bad Request',
+			redirectUrl: 'http://',
 		};
 		setRules([initialRule]);
 		updateRules([initialRule]);
@@ -186,15 +207,17 @@ const Popup: React.FC = () => {
 							/>
 						</label>
 
-						<label>
-							DATA:
-							<textarea
-								value={rule.data}
-								onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
-								placeholder="Введите mock-данные"
-								disabled={!isExtensionActive}
-							/>
-						</label>
+						{rule.responseType === 'success' && (
+							<label>
+								DATA:
+								<textarea
+									value={rule.data || ''}
+									onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
+									placeholder="Введите mock-данные"
+									disabled={!isExtensionActive}
+								/>
+							</label>
+						)}
 
 						<label>
 							Задержка (мс):
@@ -205,11 +228,60 @@ const Popup: React.FC = () => {
 									updateRule(rule.id, 'delay', parseInt(e.target.value, 10))
 								}
 								placeholder="Задержка в миллисекундах"
-								disabled={!isExtensionActive}
 								min="0"
+								disabled={!isExtensionActive}
 							/>
 						</label>
 
+						<label>
+							Тип ответа:
+							<select
+								value={rule.responseType}
+								onChange={(e) =>
+									updateRule(rule.id, 'responseType', e.target.value)
+								}
+								disabled={!isExtensionActive}
+							>
+								<option value="success">Успешный ответ (200)</option>
+								<option value="error">Ошибка (400)</option>
+								<option value="redirect">Редирект (301/302)</option>
+							</select>
+						</label>
+
+						{rule.responseType === 'error' && (
+							<div>
+								<label>
+									Текст ошибки:
+									<textarea
+										value={rule.errorMessage || 'Bad Request'}
+										onChange={(e) =>
+											updateRule(rule.id, 'errorMessage', e.target.value)
+										}
+										placeholder="Текст ошибки (например, Bad Request)"
+										disabled={!isExtensionActive}
+									/>
+								</label>
+							</div>
+						)}
+
+						{rule.responseType === 'redirect' && (
+							<div>
+								<label>
+									URL для редиректа:
+									<input
+										type="text"
+										value={rule.redirectUrl || 'http://'}
+										onChange={(e) =>
+											updateRule(rule.id, 'redirectUrl', e.target.value)
+										}
+										placeholder="URL для редиректа"
+										disabled={!isExtensionActive}
+									/>
+								</label>
+							</div>
+						)}
+
+						{/* Кнопка "Активировать перехват" */}
 						<label>
 							Активировать перехват:
 							<input
