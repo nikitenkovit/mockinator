@@ -38,14 +38,9 @@ const useRules = () => {
 	const updateRules = useCallback((newRules: Rule[]) => {
 		chrome.storage.local.set({ rules: newRules }, () => {
 			if (chrome.runtime.lastError) {
-				console.error(
-					'Ошибка при сохранении правил:',
-					chrome.runtime.lastError.message
-				);
 				return;
 			}
 
-			console.log('Правила обновлены:', newRules);
 			chrome.runtime.sendMessage({ action: 'updateRules', rules: newRules });
 		});
 	}, []);

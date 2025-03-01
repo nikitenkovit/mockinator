@@ -1,7 +1,5 @@
 import { Rule } from '../types';
 
-console.log('Фоновый скрипт загружен.');
-
 // Глобальный массив для хранения правил перехвата запросов.
 let rules: Rule[] = [];
 
@@ -23,12 +21,9 @@ declare global {
  * @param rules - Массив правил для перехвата запросов.
  */
 function overrideFetch(rules: Rule[]): void {
-	console.log('Переопределение fetch начато.');
-
 	// Сохраняем оригинальную реализацию fetch, если она еще не сохранена.
 	if (!window.originalFetch) {
 		window.originalFetch = window.fetch;
-		console.log('Оригинальный fetch сохранен.');
 	}
 
 	// Переопределяем глобальную функцию fetch.
@@ -43,16 +38,12 @@ function overrideFetch(rules: Rule[]): void {
 				: input instanceof URL
 				? input.href
 				: input.url;
-		console.log('Обнаружен fetch-запрос:', url);
 
 		// Проверяем все активные правила.
 		for (const rule of rules) {
 			if (rule.isActive && rule.path && url.includes(rule.path)) {
-				console.log('Перехвачен запрос:', url);
-
 				// Задержка, если указана.
 				if (rule.delay && rule.delay > 0) {
-					console.log(`Задержка: ${rule.delay} мс`);
 					await new Promise((resolve) => setTimeout(resolve, rule.delay));
 				}
 
@@ -79,7 +70,6 @@ function overrideFetch(rules: Rule[]): void {
 
 						// Ручной редирект, если указан redirectUrl.
 						if (rule.redirectUrl) {
-							console.log(`Редирект на: ${rule.redirectUrl}`);
 							window.location.href = rule.redirectUrl;
 							return new Response(null, { status: 301, headers });
 						}
@@ -95,11 +85,8 @@ function overrideFetch(rules: Rule[]): void {
 		}
 
 		// Если правило не найдено, выполняем оригинальный fetch.
-		console.log('Запрос не перехвачен, выполняется оригинальный fetch.');
 		return window.originalFetch(input, init);
 	};
-
-	console.log('Перехват fetch-запросов активирован.');
 }
 
 /*
@@ -109,9 +96,7 @@ function overrideFetch(rules: Rule[]): void {
 function restoreFetch(): void {
 	if (window.originalFetch) {
 		window.fetch = window.originalFetch;
-		console.log('Оригинальный fetch восстановлен.');
 	} else {
-		console.log('Оригинальный fetch не найден.');
 	}
 }
 
@@ -123,8 +108,6 @@ function restoreFetch(): void {
  */
 async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 	try {
-		console.log('Попытка внедрения скрипта на вкладку:', tabId);
-
 		// Внедряем скрипт с помощью chrome.scripting.executeScript.
 		await chrome.scripting.executeScript({
 			target: { tabId },
@@ -132,10 +115,7 @@ async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 			args: [rules],
 			world: 'MAIN',
 		});
-		console.log('Скрипт успешно внедрен на вкладку:', tabId);
 	} catch (error) {
-		console.error('Ошибка при внедрении скрипта:', error);
-
 		// Преобразуем ошибку в строку и отправляем сообщение об ошибке в popup.
 		const errorMessage =
 			error instanceof Error ? error.message : 'Неизвестная ошибка';
@@ -165,20 +145,8 @@ function updateIcon(isExtensionActive: boolean) {
 				128: 'assets/icons/inactive/icon128.png',
 		  };
 
-	// Устанавливаем новую иконку.
-	chrome.action.setIcon({ path: iconPath }, () => {
-		if (chrome.runtime.lastError) {
-			console.error(
-				'Ошибка при обновлении иконки:',
-				chrome.runtime.lastError.message
-			);
-		} else {
-			console.log(
-				'Иконка обновлена:',
-				isExtensionActive ? 'активная' : 'неактивная'
-			);
-		}
-	});
+	// Устанавливаем новую иконку на расширение.
+	chrome.action.setIcon({ path: iconPath });
 }
 
 /*
@@ -186,22 +154,14 @@ function updateIcon(isExtensionActive: boolean) {
  * Реагирует на сообщения с действиями: обновление правил, активация/деактивация расширения.
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	console.log('Получено сообщение:', message);
-
 	if (message.action === 'updateRules') {
 		// Обновляем правила и сохраняем их в хранилище.
 		rules = message.rules;
 
 		chrome.storage.local.set({ rules }, () => {
 			if (chrome.runtime.lastError) {
-				console.error(
-					'Ошибка при сохранении правил:',
-					chrome.runtime.lastError.message
-				);
 				return;
 			}
-
-			console.log('Правила сохранены:', rules);
 
 			// Внедряем скрипт в активную вкладку, если расширение активно.
 			chrome.storage.local.get(['isExtensionActive'], (result) => {
@@ -219,14 +179,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		// Активируем расширение и обновляем иконку.
 		chrome.storage.local.set({ isExtensionActive: true }, () => {
 			if (chrome.runtime.lastError) {
-				console.error(
-					'Ошибка при сохранении состояния расширения:',
-					chrome.runtime.lastError.message
-				);
 				return;
 			}
-
-			console.log('Расширение активировано.');
 
 			updateIcon(true);
 
@@ -242,14 +196,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		// Деактивируем расширение и восстанавливаем оригинальный fetch.
 		chrome.storage.local.set({ isExtensionActive: false }, () => {
 			if (chrome.runtime.lastError) {
-				console.error(
-					'Ошибка при сохранении состояния расширения:',
-					chrome.runtime.lastError.message
-				);
 				return;
 			}
-
-			console.log('Расширение деактивировано.');
 
 			updateIcon(false);
 
@@ -274,8 +222,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  */
 chrome.tabs.onActivated.addListener((activeInfo) => {
 	chrome.storage.local.set({ isExtensionActive: false }, () => {
-		console.log('Переход на другую вкладку, расширение деактивировано.');
-
 		// Обновляем иконку.
 		updateIcon(false);
 	});
@@ -287,23 +233,16 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
  */
 chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 	if (chrome.runtime.lastError) {
-		console.error(
-			'Ошибка при загрузке данных:',
-			chrome.runtime.lastError.message
-		);
 		return;
 	}
 
 	// Восстанавливаем правила.
 	if (result.rules) {
 		rules = result.rules;
-		console.log('Правила загружены из хранилища:', rules);
 	}
 
 	// Восстанавливаем состояние расширения.
 	if (result.isExtensionActive !== undefined) {
-		console.log('Состояние расширения загружено:', result.isExtensionActive);
-
 		// Обновляем иконку.
 		updateIcon(result.isExtensionActive);
 

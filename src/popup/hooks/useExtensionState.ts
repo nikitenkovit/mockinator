@@ -61,8 +61,6 @@ const useExtensionState = (
 					return;
 				}
 
-				console.log('Состояние расширения обновлено:', newIsExtensionActive);
-
 				// Отправляем сообщение в фоновый скрипт
 				chrome.runtime.sendMessage({
 					action: newIsExtensionActive
