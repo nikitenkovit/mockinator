@@ -5,16 +5,22 @@ console.log('Фоновый скрипт загружен.');
  * Каждое правило содержит:
  * - id: Уникальный идентификатор правила.
  * - path: Часть URL, которую нужно перехватывать.
- * - data: Mock-данные, которые будут возвращены вместо реального ответа.
+ * - data: Mock-данные, которые будут возвращены вместо реального ответа (необязательное поле).
  * - isActive: Флаг, указывающий, активно ли правило.
  * - delay: Задержка в миллисекундах перед возвратом mock-ответа (необязательное поле).
+ * - responseType: Тип ответа (success, error, redirect).
+ * - errorMessage: Текст ошибки.
+ * - redirectUrl: URL для редиректа.
  */
 interface Rule {
 	id: string;
 	path: string;
-	data: string;
+	data?: string;
 	isActive: boolean;
 	delay?: number;
+	responseType: 'success' | 'error' | 'redirect';
+	errorMessage?: string;
+	redirectUrl?: string;
 }
 
 // Глобальный массив для хранения правил перехвата запросов.
@@ -34,6 +40,7 @@ declare global {
  * Функция для переопределения глобальной функции fetch.
  * Перехватывает все fetch-запросы и возвращает mock-данные, если URL соответствует одному из активных правил.
  * Если для правила указана задержка (delay), она будет применена перед возвратом mock-ответа.
+ * Если выбран тип ответа "redirect", выполняется ручной редирект с использованием window.location.href.
  * @param rules - Массив правил для перехвата запросов.
  */
 function overrideFetch(rules: Rule[]): void {
@@ -63,18 +70,47 @@ function overrideFetch(rules: Rule[]): void {
 		for (const rule of rules) {
 			if (rule.isActive && rule.path && url.includes(rule.path)) {
 				console.log('Перехвачен запрос:', url);
-				console.log('Возвращаем mock-данные:', rule.data);
 
-				// Если указана задержка, ждем указанное количество миллисекунд.
+				// Задержка, если указана.
 				if (rule.delay && rule.delay > 0) {
 					console.log(`Задержка: ${rule.delay} мс`);
 					await new Promise((resolve) => setTimeout(resolve, rule.delay));
 				}
 
-				// Возвращаем mock-данные в виде Response.
-				return new Response(rule.data, {
-					status: 200,
-					headers: { 'Content-Type': 'application/json' },
+				// Определяем статус, заголовки и тело ответа.
+				let status = 200;
+				let headers: Record<string, string> = {
+					'Content-Type': 'application/json',
+				};
+				let body = '';
+
+				switch (rule.responseType) {
+					case 'success':
+						status = 200;
+						body = rule.data || ''; // Используем data для успешного ответа.
+						break;
+					case 'error':
+						status = 400; // Статус ошибки по умолчанию.
+						body = rule.errorMessage || 'Bad Request'; // Используем errorMessage для ошибки.
+						break;
+					case 'redirect':
+						status = 301;
+						headers['Location'] = rule.redirectUrl || '/'; // По умолчанию '/', если URL не указан.
+						body = ''; // Тело не нужно для редиректа.
+
+						// Ручной редирект, если указан redirectUrl.
+						if (rule.redirectUrl) {
+							console.log(`Редирект на: ${rule.redirectUrl}`);
+							window.location.href = rule.redirectUrl;
+							return new Response(null, { status: 301, headers });
+						}
+						break;
+				}
+
+				// Возвращаем mock-ответ.
+				return new Response(body, {
+					status,
+					headers,
 				});
 			}
 		}
