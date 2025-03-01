@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /*
  * Интерфейс для описания правил перехвата запросов.
@@ -57,7 +57,7 @@ const useRules = () => {
 	}, []);
 
 	// Обновление правил в хранилище
-	const updateRules = (newRules: Rule[]) => {
+	const updateRules = useCallback((newRules: Rule[]) => {
 		chrome.storage.local.set({ rules: newRules }, () => {
 			if (chrome.runtime.lastError) {
 				console.error(
@@ -70,10 +70,10 @@ const useRules = () => {
 			console.log('Правила обновлены:', newRules);
 			chrome.runtime.sendMessage({ action: 'updateRules', rules: newRules });
 		});
-	};
+	}, []);
 
 	// Добавление нового правила
-	const addRule = () => {
+	const addRule = useCallback(() => {
 		const newRule: Rule = {
 			id: Date.now().toString(),
 			path: '',
@@ -87,50 +87,55 @@ const useRules = () => {
 		const newRules = [...rules, newRule];
 		setRules(newRules);
 		updateRules(newRules);
-	};
+	}, [rules, updateRules]);
 
 	// Удаление правила
-	const deleteRule = (id: string) => {
-		const newRules = rules.filter((rule) => rule.id !== id);
-		setRules(newRules);
-		updateRules(newRules);
-	};
+	const deleteRule = useCallback(
+		(id: string) => {
+			const newRules = rules.filter((rule) => rule.id !== id);
+			setRules(newRules);
+			updateRules(newRules);
+		},
+		[rules, updateRules]
+	);
 
 	// Обновление отдельного правила
-	const updateRule = (
-		id: string,
-		field: keyof Rule,
-		value: string | boolean | number
-	) => {
-		const newRules = rules.map((rule) =>
-			rule.id === id ? { ...rule, [field]: value } : rule
-		);
-		setRules(newRules);
-		updateRules(newRules);
-	};
+	const updateRule = useCallback(
+		(id: string, field: keyof Rule, value: string | boolean | number) => {
+			const newRules = rules.map((rule) =>
+				rule.id === id ? { ...rule, [field]: value } : rule
+			);
+			setRules(newRules);
+			updateRules(newRules);
+		},
+		[rules, updateRules]
+	);
 
 	// Очистка полей ввода для конкретного правила
-	const clearRuleFields = (id: string) => {
-		const newRules = rules.map((rule) =>
-			rule.id === id
-				? {
-						...rule,
-						path: '',
-						data: '',
-						delay: 0,
-						isActive: false,
-						responseType: 'success' as const,
-						errorMessage: 'Bad Request',
-						redirectUrl: 'http://',
-				  }
-				: rule
-		);
-		setRules(newRules);
-		updateRules(newRules);
-	};
+	const clearRuleFields = useCallback(
+		(id: string) => {
+			const newRules = rules.map((rule) =>
+				rule.id === id
+					? {
+							...rule,
+							path: '',
+							data: '',
+							delay: 0,
+							isActive: false,
+							responseType: 'success' as const,
+							errorMessage: 'Bad Request',
+							redirectUrl: 'http://',
+					  }
+					: rule
+			);
+			setRules(newRules);
+			updateRules(newRules);
+		},
+		[rules, updateRules]
+	);
 
 	// Сброс всего состояния до первоначального
-	const resetState = () => {
+	const resetState = useCallback(() => {
 		const initialRule: Rule = {
 			id: Date.now().toString(),
 			path: '',
@@ -143,7 +148,7 @@ const useRules = () => {
 		};
 		setRules([initialRule]);
 		updateRules([initialRule]);
-	};
+	}, [updateRules]);
 
 	return {
 		rules,
