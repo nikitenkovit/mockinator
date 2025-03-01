@@ -9,5 +9,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"moduleResolution": "NodeNext",
 		"types": ["vite/client"]
-	}
+	},
+	"exclude": ["node_modules", "dist"]
 }

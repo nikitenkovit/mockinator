@@ -6,13 +6,20 @@ interface Rule {
 	path: string;
 	data: string;
 	isActive: boolean;
+	delay?: number;
 }
 
 const Popup: React.FC = () => {
 	const [rules, setRules] = useState<Rule[]>([
-		{ id: Date.now().toString(), path: '', data: '', isActive: false },
+		{
+			id: Date.now().toString(),
+			path: '',
+			data: '',
+			isActive: false,
+			delay: 0,
+		},
 	]);
-	const [isExtensionActive, setIsExtensionActive] = useState(false); // Состояние расширения (включено/выключено)
+	const [isExtensionActive, setIsExtensionActive] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	// Загрузка данных при открытии popup
@@ -63,6 +70,7 @@ const Popup: React.FC = () => {
 			path: '',
 			data: '',
 			isActive: false,
+			delay: 0,
 		};
 		const newRules = [...rules, newRule];
 		setRules(newRules);
@@ -80,7 +88,7 @@ const Popup: React.FC = () => {
 	const updateRule = (
 		id: string,
 		field: keyof Rule,
-		value: string | boolean
+		value: string | boolean | number
 	) => {
 		const newRules = rules.map((rule) =>
 			rule.id === id ? { ...rule, [field]: value } : rule
@@ -92,7 +100,9 @@ const Popup: React.FC = () => {
 	// Очистка полей ввода для конкретного правила
 	const clearRuleFields = (id: string) => {
 		const newRules = rules.map((rule) =>
-			rule.id === id ? { ...rule, path: '', data: '', isActive: false } : rule
+			rule.id === id
+				? { ...rule, path: '', data: '', delay: 0, isActive: false }
+				: rule
 		);
 		setRules(newRules);
 		updateRules(newRules);
@@ -105,6 +115,7 @@ const Popup: React.FC = () => {
 			path: '',
 			data: '',
 			isActive: false,
+			delay: 0,
 		};
 		setRules([initialRule]);
 		updateRules([initialRule]);
@@ -182,6 +193,20 @@ const Popup: React.FC = () => {
 								onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
 								placeholder="Введите mock-данные"
 								disabled={!isExtensionActive}
+							/>
+						</label>
+
+						<label>
+							Задержка (мс):
+							<input
+								type="number"
+								value={rule.delay || 0}
+								onChange={(e) =>
+									updateRule(rule.id, 'delay', parseInt(e.target.value, 10))
+								}
+								placeholder="Задержка в миллисекундах"
+								disabled={!isExtensionActive}
+								min="0"
 							/>
 						</label>
 
