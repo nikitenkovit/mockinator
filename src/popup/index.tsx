@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Rule from './Rule';
-import { useRules } from './hooks';
+import { useErrorHandling, useExtensionState, useRules } from './hooks';
 
 const Popup: React.FC = () => {
-	const [isExtensionActive, setIsExtensionActive] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-
+	const { error, setError } = useErrorHandling();
 	const {
 		rules,
 		addRule,
@@ -15,58 +13,10 @@ const Popup: React.FC = () => {
 		clearRuleFields,
 		resetState,
 	} = useRules();
-
-	// Загрузка данных при открытии popup
-	useEffect(() => {
-		chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
-			if (chrome.runtime.lastError) {
-				setError(
-					`Ошибка при загрузке данных: ${chrome.runtime.lastError.message}`
-				);
-				return;
-			}
-
-			if (result.isExtensionActive !== undefined) {
-				setIsExtensionActive(result.isExtensionActive);
-			}
-		});
-
-		// Слушаем сообщения об ошибках из background.ts
-		chrome.runtime.onMessage.addListener((message) => {
-			if (message.action === 'error') {
-				setError(message.error);
-			}
-		});
-	}, []);
-
-	// Переключение состояния расширения
-	const toggleExtension = () => {
-		const newIsExtensionActive = !isExtensionActive;
-		setIsExtensionActive(newIsExtensionActive);
-
-		// Сохраняем состояние расширения в хранилище
-		chrome.storage.local.set(
-			{ isExtensionActive: newIsExtensionActive },
-			() => {
-				if (chrome.runtime.lastError) {
-					setError(
-						`Ошибка при сохранении состояния расширения: ${chrome.runtime.lastError.message}`
-					);
-					return;
-				}
-
-				console.log('Состояние расширения обновлено:', newIsExtensionActive);
-
-				// Отправляем сообщение в фоновый скрипт
-				chrome.runtime.sendMessage({
-					action: newIsExtensionActive
-						? 'activateExtension'
-						: 'deactivateExtension',
-					rules,
-				});
-			}
-		);
-	};
+	const { isExtensionActive, toggleExtension } = useExtensionState(
+		setError,
+		rules
+	);
 
 	return (
 		<div>
@@ -90,6 +40,7 @@ const Popup: React.FC = () => {
 				/>
 			</label>
 
+			{/* Список правил */}
 			<ul style={{ listStyle: 'none', padding: 0 }}>
 				{rules.map((rule) => (
 					<Rule
@@ -104,6 +55,7 @@ const Popup: React.FC = () => {
 				))}
 			</ul>
 
+			{/* Кнопки для управления правилами */}
 			<button onClick={addRule} disabled={!isExtensionActive}>
 				Add Rule
 			</button>
