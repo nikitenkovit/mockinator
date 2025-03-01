@@ -13,8 +13,3 @@ document.getElementById('fetchButton2').addEventListener('click', () => {
 		.then((data) => console.log('Результат fetch-запроса (comments):', data))
 		.catch((error) => console.error('Ошибка fetch-запроса (comments):', error));
 });
-
-/*
-posts
-{"title": "Хочу свой дом!", "body": "Домик в деревне", "userId": 1}
-*/

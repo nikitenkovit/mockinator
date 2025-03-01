@@ -7,12 +7,14 @@ console.log('Фоновый скрипт загружен.');
  * - path: Часть URL, которую нужно перехватывать.
  * - data: Mock-данные, которые будут возвращены вместо реального ответа.
  * - isActive: Флаг, указывающий, активно ли правило.
+ * - delay: Задержка в миллисекундах перед возвратом mock-ответа (необязательное поле).
  */
 interface Rule {
 	id: string;
 	path: string;
 	data: string;
 	isActive: boolean;
+	delay?: number;
 }
 
 // Глобальный массив для хранения правил перехвата запросов.
@@ -31,6 +33,7 @@ declare global {
 /*
  * Функция для переопределения глобальной функции fetch.
  * Перехватывает все fetch-запросы и возвращает mock-данные, если URL соответствует одному из активных правил.
+ * Если для правила указана задержка (delay), она будет применена перед возвратом mock-ответа.
  * @param rules - Массив правил для перехвата запросов.
  */
 function overrideFetch(rules: Rule[]): void {
@@ -61,6 +64,12 @@ function overrideFetch(rules: Rule[]): void {
 			if (rule.isActive && rule.path && url.includes(rule.path)) {
 				console.log('Перехвачен запрос:', url);
 				console.log('Возвращаем mock-данные:', rule.data);
+
+				// Если указана задержка, ждем указанное количество миллисекунд.
+				if (rule.delay && rule.delay > 0) {
+					console.log(`Задержка: ${rule.delay} мс`);
+					await new Promise((resolve) => setTimeout(resolve, rule.delay));
+				}
 
 				// Возвращаем mock-данные в виде Response.
 				return new Response(rule.data, {
