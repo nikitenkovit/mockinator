@@ -1,28 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Rule } from '../../types';
 
 /*
- * Интерфейс для описания правил перехвата запросов.
- * Каждое правило содержит:
- * - id: Уникальный идентификатор правила.
- * - path: Часть URL, которую нужно перехватывать.
- * - data: Mock-данные, которые будут возвращены вместо реального ответа (необязательное поле).
- * - isActive: Флаг, указывающий, активно ли правило.
- * - delay: Задержка в миллисекундах перед возвратом mock-ответа (необязательное поле).
- * - responseType: Тип ответа (success, error, redirect).
- * - errorMessage: Текст ошибки.
- * - redirectUrl: URL для редиректа.
+ * Хук для управления состоянием расширения
+ * Возвращает:
+ * -isExtensionActive: флаг активности расширения
+ * -toggleExtension: функция переключения состояния расширения
  */
-interface Rule {
-	id: string;
-	path: string;
-	data?: string;
-	isActive: boolean;
-	delay?: number;
-	responseType: 'success' | 'error' | 'redirect';
-	errorMessage?: string;
-	redirectUrl?: string;
-}
-
 const useExtensionState = (
 	setError: (error: string) => void,
 	rules: Rule[] = []
