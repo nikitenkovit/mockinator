@@ -10,6 +10,13 @@ const Rule: React.FC<RuleProps> = React.memo(
 		deleteRule,
 		rulesCount,
 	}) => {
+		const responseExamples = {
+			json: JSON.stringify({ title: 'Пример JSON ответа' }),
+			text: 'Пример текстового ответа',
+			html: '<h1>Пример HTML ответа</h1>',
+			xml: '<root><item>Пример XML ответа</item></root>',
+		};
+
 		return (
 			<li key={rule.id} style={{ marginBottom: '10px' }}>
 				<label>
@@ -24,15 +31,41 @@ const Rule: React.FC<RuleProps> = React.memo(
 				</label>
 
 				{rule.responseType === 'success' && (
-					<label>
-						DATA:
-						<textarea
-							value={rule.data || ''}
-							onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
-							placeholder="Введите mock-данные"
-							disabled={!isExtensionActive}
-						/>
-					</label>
+					<>
+						<label>
+							Тип успешного ответа:
+							<select
+								value={rule.successResponseType}
+								onChange={(e) => {
+									const newType = e.target.value as
+										| 'json'
+										| 'text'
+										| 'html'
+										| 'xml';
+									updateRule(rule.id, {
+										successResponseType: newType,
+										data: responseExamples[newType],
+									});
+								}}
+								disabled={!isExtensionActive}
+							>
+								<option value="json">JSON</option>
+								<option value="text">Text</option>
+								<option value="html">HTML</option>
+								<option value="xml">XML</option>
+							</select>
+						</label>
+
+						<label>
+							DATA:
+							<textarea
+								value={rule.data || responseExamples.json}
+								onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
+								placeholder="Введите mock-данные"
+								disabled={!isExtensionActive}
+							/>
+						</label>
+					</>
 				)}
 
 				<label>
@@ -97,7 +130,6 @@ const Rule: React.FC<RuleProps> = React.memo(
 					</div>
 				)}
 
-				{/* Кнопка "Активировать перехват" */}
 				<label>
 					Активировать перехват:
 					<input
@@ -108,7 +140,6 @@ const Rule: React.FC<RuleProps> = React.memo(
 					/>
 				</label>
 
-				{/* Кнопка для очистки полей ввода */}
 				<button
 					onClick={() => clearRuleFields(rule.id)}
 					disabled={!isExtensionActive}
@@ -116,7 +147,6 @@ const Rule: React.FC<RuleProps> = React.memo(
 					Clear Fields
 				</button>
 
-				{/* Кнопка "Delete Rule" отображается, если это не последний элемент */}
 				{rulesCount > 1 && (
 					<button
 						onClick={() => deleteRule(rule.id)}

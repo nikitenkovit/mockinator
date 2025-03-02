@@ -16,25 +16,24 @@ const useRules = () => {
 		{
 			id: Date.now().toString(),
 			path: '',
-			data: '',
+			data: '{"title": "Пример JSON ответа"}',
 			isActive: false,
 			delay: 0,
-			responseType: 'success',
+			responseType: 'success' as const,
+			successResponseType: 'json' as const,
 			errorMessage: 'Bad Request',
 			redirectUrl: 'http://',
 		},
 	]);
 
-	// Загрузка правил из хранилища при монтировании компонента
 	useEffect(() => {
 		chrome.storage.local.get(['rules'], (result) => {
-			if (result.rules && result.rules.length > 0) {
+			if (result.rules) {
 				setRules(result.rules);
 			}
 		});
 	}, []);
 
-	// Обновление правил в хранилище
 	const updateRules = useCallback((newRules: Rule[]) => {
 		chrome.storage.local.set({ rules: newRules }, () => {
 			if (chrome.runtime.lastError) {
@@ -45,15 +44,15 @@ const useRules = () => {
 		});
 	}, []);
 
-	// Добавление нового правила
 	const addRule = useCallback(() => {
 		const newRule: Rule = {
 			id: Date.now().toString(),
 			path: '',
-			data: '',
+			data: '{"title": "Пример JSON ответа"}',
 			isActive: false,
 			delay: 0,
-			responseType: 'success',
+			responseType: 'success' as const,
+			successResponseType: 'json' as const,
 			errorMessage: 'Bad Request',
 			redirectUrl: 'http://',
 		};
@@ -62,7 +61,6 @@ const useRules = () => {
 		updateRules(newRules);
 	}, [rules, updateRules]);
 
-	// Удаление правила
 	const deleteRule = useCallback(
 		(id: string) => {
 			const newRules = rules.filter((rule) => rule.id !== id);
@@ -72,11 +70,18 @@ const useRules = () => {
 		[rules, updateRules]
 	);
 
-	// Обновление отдельного правила
 	const updateRule = useCallback(
-		(id: string, field: keyof Rule, value: string | boolean | number) => {
+		(
+			id: string,
+			field: keyof Rule | Partial<Rule>,
+			value?: string | boolean | number
+		) => {
 			const newRules = rules.map((rule) =>
-				rule.id === id ? { ...rule, [field]: value } : rule
+				rule.id === id
+					? typeof field !== 'object'
+						? { ...rule, [field]: value }
+						: { ...rule, ...field }
+					: rule
 			);
 			setRules(newRules);
 			updateRules(newRules);
@@ -84,7 +89,6 @@ const useRules = () => {
 		[rules, updateRules]
 	);
 
-	// Очистка полей ввода для конкретного правила
 	const clearRuleFields = useCallback(
 		(id: string) => {
 			const newRules = rules.map((rule) =>
@@ -92,10 +96,11 @@ const useRules = () => {
 					? {
 							...rule,
 							path: '',
-							data: '',
+							data: '{"title": "Пример JSON ответа"}',
 							delay: 0,
 							isActive: false,
 							responseType: 'success' as const,
+							successResponseType: 'json' as const,
 							errorMessage: 'Bad Request',
 							redirectUrl: 'http://',
 					  }
@@ -107,15 +112,15 @@ const useRules = () => {
 		[rules, updateRules]
 	);
 
-	// Сброс всего состояния до первоначального
 	const resetState = useCallback(() => {
 		const initialRule: Rule = {
 			id: Date.now().toString(),
 			path: '',
-			data: '',
+			data: '{"title": "Пример JSON ответа"}',
 			isActive: false,
 			delay: 0,
-			responseType: 'success',
+			responseType: 'success' as const,
+			successResponseType: 'json' as const,
 			errorMessage: 'Bad Request',
 			redirectUrl: 'http://',
 		};
