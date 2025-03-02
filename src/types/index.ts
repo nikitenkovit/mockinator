@@ -7,6 +7,7 @@
  * - isActive: Флаг, указывающий, активно ли правило.
  * - delay: Задержка в миллисекундах перед возвратом mock-ответа (необязательное поле).
  * - responseType: Тип ответа (success, error, redirect).
+ * - successResponseType: Тип успешного ответа (json, text, html, xml).
  * - errorMessage: Текст ошибки.
  * - redirectUrl: URL для редиректа.
  */
@@ -17,6 +18,7 @@ export interface Rule {
 	isActive: boolean;
 	delay?: number;
 	responseType: 'success' | 'error' | 'redirect';
+	successResponseType?: 'json' | 'text' | 'html' | 'xml';
 	errorMessage?: string;
 	redirectUrl?: string;
 }
@@ -29,8 +31,8 @@ export interface RuleProps {
 	isExtensionActive: boolean;
 	updateRule: (
 		id: string,
-		field: keyof Rule,
-		value: string | boolean | number
+		field: keyof Rule | Partial<Rule>,
+		value?: string | boolean | number
 	) => void;
 	clearRuleFields: (id: string) => void;
 	deleteRule: (id: string) => void;

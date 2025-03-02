@@ -1,6 +1,5 @@
 import { Rule } from '../types';
 
-// Глобальный массив для хранения правил перехвата запросов.
 let rules: Rule[] = [];
 
 /*
@@ -21,17 +20,14 @@ declare global {
  * @param rules - Массив правил для перехвата запросов.
  */
 function overrideFetch(rules: Rule[]): void {
-	// Сохраняем оригинальную реализацию fetch, если она еще не сохранена.
 	if (!window.originalFetch) {
 		window.originalFetch = window.fetch;
 	}
 
-	// Переопределяем глобальную функцию fetch.
 	window.fetch = async (
 		input: RequestInfo | URL,
 		init?: RequestInit
 	): Promise<Response> => {
-		// Получаем URL из входных данных.
 		const url =
 			typeof input === 'string'
 				? input
@@ -39,44 +35,33 @@ function overrideFetch(rules: Rule[]): void {
 				? input.href
 				: input.url;
 
-		// Проверяем все активные правила.
 		for (const rule of rules) {
 			if (rule.isActive && rule.path && url.includes(rule.path)) {
-				// Задержка, если указана.
 				if (rule.delay && rule.delay > 0) {
 					await new Promise((resolve) => setTimeout(resolve, rule.delay));
 				}
 
-				// Определяем статус, заголовки и тело ответа.
 				let status = 200;
-				let headers: Record<string, string> = {
-					'Content-Type': 'application/json',
-				};
-				let body = '';
+				let headers: Record<string, string> = {};
+				let body = rule.data || '{"title": "Пример JSON ответа"}';
 
-				switch (rule.responseType) {
-					case 'success':
-						status = 200;
-						body = rule.data || ''; // Используем data для успешного ответа.
+				switch (rule.successResponseType) {
+					case 'json':
+						headers['Content-Type'] = 'application/json';
 						break;
-					case 'error':
-						status = 400; // Статус ошибки по умолчанию.
-						body = rule.errorMessage || 'Bad Request'; // Используем errorMessage для ошибки.
+					case 'text':
+						headers['Content-Type'] = 'text/plain';
 						break;
-					case 'redirect':
-						status = 301;
-						headers['Location'] = rule.redirectUrl || '/'; // По умолчанию '/', если URL не указан.
-						body = ''; // Тело не нужно для редиректа.
-
-						// Ручной редирект, если указан redirectUrl.
-						if (rule.redirectUrl) {
-							window.location.href = rule.redirectUrl;
-							return new Response(null, { status: 301, headers });
-						}
+					case 'html':
+						headers['Content-Type'] = 'text/html';
 						break;
+					case 'xml':
+						headers['Content-Type'] = 'application/xml';
+						break;
+					default:
+						headers['Content-Type'] = 'application/json';
 				}
 
-				// Возвращаем mock-ответ.
 				return new Response(body, {
 					status,
 					headers,
@@ -84,7 +69,6 @@ function overrideFetch(rules: Rule[]): void {
 			}
 		}
 
-		// Если правило не найдено, выполняем оригинальный fetch.
 		return window.originalFetch(input, init);
 	};
 }
@@ -108,7 +92,6 @@ function restoreFetch(): void {
  */
 async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 	try {
-		// Внедряем скрипт с помощью chrome.scripting.executeScript.
 		await chrome.scripting.executeScript({
 			target: { tabId },
 			func: overrideFetch,
@@ -116,7 +99,6 @@ async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 			world: 'MAIN',
 		});
 	} catch (error) {
-		// Преобразуем ошибку в строку и отправляем сообщение об ошибке в popup.
 		const errorMessage =
 			error instanceof Error ? error.message : 'Неизвестная ошибка';
 
@@ -163,7 +145,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				return;
 			}
 
-			// Внедряем скрипт в активную вкладку, если расширение активно.
 			chrome.storage.local.get(['isExtensionActive'], (result) => {
 				if (result.isExtensionActive) {
 					chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -176,7 +157,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			});
 		});
 	} else if (message.action === 'activateExtension') {
-		// Активируем расширение и обновляем иконку.
 		chrome.storage.local.set({ isExtensionActive: true }, () => {
 			if (chrome.runtime.lastError) {
 				return;
@@ -184,7 +164,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 			updateIcon(true);
 
-			// Внедряем скрипт в активную вкладку.
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
 				if (tabId) {
@@ -193,7 +172,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			});
 		});
 	} else if (message.action === 'deactivateExtension') {
-		// Деактивируем расширение и восстанавливаем оригинальный fetch.
 		chrome.storage.local.set({ isExtensionActive: false }, () => {
 			if (chrome.runtime.lastError) {
 				return;
@@ -201,7 +179,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 			updateIcon(false);
 
-			// Восстанавливаем оригинальный fetch в активной вкладке.
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
 				if (tabId) {
@@ -222,7 +199,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  */
 chrome.tabs.onActivated.addListener((activeInfo) => {
 	chrome.storage.local.set({ isExtensionActive: false }, () => {
-		// Обновляем иконку.
 		updateIcon(false);
 	});
 });
@@ -236,17 +212,13 @@ chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 		return;
 	}
 
-	// Восстанавливаем правила.
 	if (result.rules) {
 		rules = result.rules;
 	}
 
-	// Восстанавливаем состояние расширения.
 	if (result.isExtensionActive !== undefined) {
-		// Обновляем иконку.
 		updateIcon(result.isExtensionActive);
 
-		// Внедряем скрипт в активную вкладку, если расширение активно.
 		if (result.isExtensionActive) {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
