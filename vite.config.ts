@@ -6,7 +6,9 @@ export default defineConfig(
 	({ mode }: { mode: 'development' | 'production' }) => ({
 		plugins: [react()],
 		css: {
-			modules: true,
+			modules: {
+				localsConvention: 'camelCase',
+			},
 		},
 		build: {
 			outDir: mode === 'production' ? 'dist' : 'dev',
@@ -20,11 +22,13 @@ export default defineConfig(
 					assetFileNames: 'assets/[name].[ext]',
 				},
 			},
+			cssCodeSplit: false,
 		},
-		// Удалить, если не буду использовать
+		// TODO: Удалить, если не буду использовать
 		server: {
 			port: 3000,
 			open: true,
 		},
+		publicDir: 'public',
 	})
 );
