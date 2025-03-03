@@ -47,6 +47,21 @@ const Rule: React.FC<RuleProps> = React.memo(
 					/>
 				</label>
 
+				<label>
+					Тип ответа:
+					<select
+						value={rule.responseType}
+						onChange={(e) =>
+							updateRule(rule.id, 'responseType', e.target.value)
+						}
+						disabled={!isExtensionActive}
+					>
+						<option value="success">Успешный ответ (200)</option>
+						<option value="error">Ошибка (400)</option>
+						<option value="redirect">Редирект (301/302)</option>
+					</select>
+				</label>
+
 				{rule.responseType === 'success' && (
 					<>
 						<label>
@@ -85,45 +100,22 @@ const Rule: React.FC<RuleProps> = React.memo(
 					</>
 				)}
 
-				<label>
-					Задержка (мс):
-					<input
-						type="number"
-						value={rule.delay || 0}
-						onChange={(e) =>
-							updateRule(rule.id, 'delay', parseInt(e.target.value, 10))
-						}
-						placeholder="Задержка в миллисекундах"
-						min="0"
-						disabled={!isExtensionActive}
-					/>
-				</label>
-
-				<label>
-					Тип ответа:
-					<select
-						value={rule.responseType}
-						onChange={(e) =>
-							updateRule(rule.id, 'responseType', e.target.value)
-						}
-						disabled={!isExtensionActive}
-					>
-						<option value="success">Успешный ответ (200)</option>
-						<option value="error">Ошибка (400)</option>
-						<option value="redirect">Редирект (301/302)</option>
-					</select>
-				</label>
-
 				{rule.responseType === 'error' && (
 					<div>
 						<label>
-							Текст ошибки:
+							JSON-ответ на ошибку:
 							<textarea
-								value={rule.errorMessage || 'Bad Request'}
-								onChange={(e) =>
-									updateRule(rule.id, 'errorMessage', e.target.value)
+								value={
+									rule.errorResponse ||
+									JSON.stringify({
+										error: 'Bad Request',
+										message: 'Invalid data',
+									})
 								}
-								placeholder="Текст ошибки (например, Bad Request)"
+								onChange={(e) =>
+									updateRule(rule.id, 'errorResponse', e.target.value)
+								}
+								placeholder="Введите JSON-ответ на ошибку"
 								disabled={!isExtensionActive}
 							/>
 						</label>
@@ -146,6 +138,20 @@ const Rule: React.FC<RuleProps> = React.memo(
 						</label>
 					</div>
 				)}
+
+				<label>
+					Задержка (мс):
+					<input
+						type="number"
+						value={rule.delay || 0}
+						onChange={(e) =>
+							updateRule(rule.id, 'delay', parseInt(e.target.value, 10))
+						}
+						placeholder="Задержка в миллисекундах"
+						min="0"
+						disabled={!isExtensionActive}
+					/>
+				</label>
 
 				<label>
 					Активировать перехват:

@@ -9,7 +9,7 @@
  * - delay: Задержка в миллисекундах перед возвратом mock-ответа (необязательное поле).
  * - responseType: Тип ответа (success, error, redirect).
  * - successResponseType: Тип успешного ответа (json, text, html, xml).
- * - errorMessage: Текст ошибки.
+ * - errorResponse: JSON-ответ на ошибку.
  * - redirectUrl: URL для редиректа.
  */
 export interface Rule {
@@ -21,7 +21,7 @@ export interface Rule {
 	delay?: number;
 	responseType: 'success' | 'error' | 'redirect';
 	successResponseType?: 'json' | 'text' | 'html' | 'xml';
-	errorMessage?: string;
+	errorResponse?: string;
 	redirectUrl?: string;
 }
 
