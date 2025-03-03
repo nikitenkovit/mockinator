@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Rule from './Rule';
+import '../global.css';
 import { useErrorHandling, useExtensionState, useRules } from './hooks';
+import styles from './Popup.module.css';
+import Rule from './Rule';
 
 const Popup: React.FC = () => {
 	const { error, setError } = useErrorHandling();
@@ -19,49 +21,60 @@ const Popup: React.FC = () => {
 	);
 
 	return (
-		<div>
-			<h1>Mockinator</h1>
-			<p>Перехват fetch-запросов и возврат mock-данных.</p>
+		<div className={styles.container}>
+			<div className={styles.header}>
+				<h1 className={styles.title}>Mockinator</h1>
+				<p className={styles.description}>
+					Перехват fetch-запросов и возврат mock-данных.
+				</p>
+			</div>
 
-			{/* Отображение ошибки */}
-			{error && (
-				<div style={{ color: 'red', marginBottom: '10px' }}>
-					Ошибка: {error}
-				</div>
-			)}
+			{error && <div className={styles.error}>Ошибка: {error}</div>}
 
-			{/* Чекбокс для активации/деактивации расширения */}
-			<label>
-				Активировать расширение:
-				<input
-					type="checkbox"
-					checked={isExtensionActive}
-					onChange={toggleExtension}
-				/>
-			</label>
-
-			{/* Список правил */}
-			<ul style={{ listStyle: 'none', padding: 0 }}>
-				{rules.map((rule) => (
-					<Rule
-						key={rule.id}
-						rule={rule}
-						isExtensionActive={isExtensionActive}
-						updateRule={updateRule}
-						clearRuleFields={clearRuleFields}
-						deleteRule={deleteRule}
-						rulesCount={rules.length}
+			<div className={styles.toggleSection}>
+				<label>
+					Активировать расширение:
+					<input
+						type="checkbox"
+						checked={isExtensionActive}
+						onChange={toggleExtension}
 					/>
-				))}
-			</ul>
+				</label>
+			</div>
 
-			{/* Кнопки для управления правилами */}
-			<button onClick={addRule} disabled={!isExtensionActive}>
-				Add Rule
-			</button>
-			<button onClick={resetState} disabled={!isExtensionActive}>
-				Reset State
-			</button>
+			<div className={styles.rulesSection}>
+				<ul style={{ listStyle: 'none', padding: 0 }}>
+					{rules.map((rule) => (
+						<li key={rule.id} className={styles.ruleItem}>
+							<Rule
+								rule={rule}
+								isExtensionActive={isExtensionActive}
+								updateRule={updateRule}
+								clearRuleFields={clearRuleFields}
+								deleteRule={deleteRule}
+								rulesCount={rules.length}
+							/>
+						</li>
+					))}
+				</ul>
+			</div>
+
+			<div className={styles.controlsSection}>
+				<button
+					className={styles.button}
+					onClick={addRule}
+					disabled={!isExtensionActive}
+				>
+					Add Rule
+				</button>
+				<button
+					className={styles.button}
+					onClick={resetState}
+					disabled={!isExtensionActive}
+				>
+					Reset State
+				</button>
+			</div>
 		</div>
 	);
 };
