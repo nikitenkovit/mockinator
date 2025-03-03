@@ -20,6 +20,23 @@ const Rule: React.FC<RuleProps> = React.memo(
 		return (
 			<li key={rule.id} style={{ marginBottom: '10px' }}>
 				<label>
+					Метод:
+					<select
+						value={rule.method}
+						onChange={(e) => updateRule(rule.id, 'method', e.target.value)}
+						disabled={!isExtensionActive}
+					>
+						<option value="GET">GET</option>
+						<option value="POST">POST</option>
+						<option value="PUT">PUT</option>
+						<option value="DELETE">DELETE</option>
+						<option value="PATCH">PATCH</option>
+						<option value="HEAD">HEAD</option>
+						<option value="OPTIONS">OPTIONS</option>
+					</select>
+				</label>
+
+				<label>
 					PATH:
 					<input
 						type="text"
