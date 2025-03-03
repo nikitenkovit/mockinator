@@ -52,21 +52,32 @@ function overrideFetch(rules: Rule[]): void {
 				let headers: Record<string, string> = {};
 				let body = rule.data || '{"title": "Пример JSON ответа"}';
 
-				switch (rule.successResponseType) {
-					case 'json':
-						headers['Content-Type'] = 'application/json';
-						break;
-					case 'text':
-						headers['Content-Type'] = 'text/plain';
-						break;
-					case 'html':
-						headers['Content-Type'] = 'text/html';
-						break;
-					case 'xml':
-						headers['Content-Type'] = 'application/xml';
-						break;
-					default:
-						headers['Content-Type'] = 'application/json';
+				if (rule.responseType === 'error') {
+					status = 400;
+					body =
+						rule.errorResponse ||
+						JSON.stringify({ error: 'Bad Request', message: 'Invalid data' });
+					headers['Content-Type'] = 'application/json';
+				} else if (rule.responseType === 'redirect') {
+					status = 301;
+					headers['Location'] = rule.redirectUrl || 'http://';
+				} else {
+					switch (rule.successResponseType) {
+						case 'json':
+							headers['Content-Type'] = 'application/json';
+							break;
+						case 'text':
+							headers['Content-Type'] = 'text/plain';
+							break;
+						case 'html':
+							headers['Content-Type'] = 'text/html';
+							break;
+						case 'xml':
+							headers['Content-Type'] = 'application/xml';
+							break;
+						default:
+							headers['Content-Type'] = 'application/json';
+					}
 				}
 
 				return new Response(body, {
