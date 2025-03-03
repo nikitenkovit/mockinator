@@ -22,7 +22,10 @@ const useRules = () => {
 			delay: 0,
 			responseType: 'success' as const,
 			successResponseType: 'json' as const,
-			errorMessage: 'Bad Request',
+			errorResponse: JSON.stringify({
+				error: 'Bad Request',
+				message: 'Invalid data',
+			}),
 			redirectUrl: 'http://',
 		},
 	]);
@@ -55,7 +58,10 @@ const useRules = () => {
 			delay: 0,
 			responseType: 'success' as const,
 			successResponseType: 'json' as const,
-			errorMessage: 'Bad Request',
+			errorResponse: JSON.stringify({
+				error: 'Bad Request',
+				message: 'Invalid data',
+			}),
 			redirectUrl: 'http://',
 		};
 		const newRules = [...rules, newRule];
@@ -104,7 +110,10 @@ const useRules = () => {
 							isActive: false,
 							responseType: 'success' as const,
 							successResponseType: 'json' as const,
-							errorMessage: 'Bad Request',
+							errorResponse: JSON.stringify({
+								error: 'Bad Request',
+								message: 'Invalid data',
+							}),
 							redirectUrl: 'http://',
 					  }
 					: rule
@@ -125,7 +134,10 @@ const useRules = () => {
 			delay: 0,
 			responseType: 'success' as const,
 			successResponseType: 'json' as const,
-			errorMessage: 'Bad Request',
+			errorResponse: JSON.stringify({
+				error: 'Bad Request',
+				message: 'Invalid data',
+			}),
 			redirectUrl: 'http://',
 		};
 		setRules([initialRule]);

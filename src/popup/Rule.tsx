@@ -91,7 +91,7 @@ const Rule: React.FC<RuleProps> = React.memo(
 						<label>
 							DATA:
 							<textarea
-								value={rule.data || responseExamples.json}
+								value={rule.data || ''}
 								onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
 								placeholder="Введите mock-данные"
 								disabled={!isExtensionActive}
@@ -105,13 +105,7 @@ const Rule: React.FC<RuleProps> = React.memo(
 						<label>
 							JSON-ответ на ошибку:
 							<textarea
-								value={
-									rule.errorResponse ||
-									JSON.stringify({
-										error: 'Bad Request',
-										message: 'Invalid data',
-									})
-								}
+								value={rule.errorResponse || ''}
 								onChange={(e) =>
 									updateRule(rule.id, 'errorResponse', e.target.value)
 								}
@@ -128,7 +122,7 @@ const Rule: React.FC<RuleProps> = React.memo(
 							URL для редиректа:
 							<input
 								type="text"
-								value={rule.redirectUrl || 'http://'}
+								value={rule.redirectUrl || ''}
 								onChange={(e) =>
 									updateRule(rule.id, 'redirectUrl', e.target.value)
 								}
@@ -143,9 +137,9 @@ const Rule: React.FC<RuleProps> = React.memo(
 					Задержка (мс):
 					<input
 						type="number"
-						value={rule.delay || 0}
+						value={rule.delay ?? ''}
 						onChange={(e) =>
-							updateRule(rule.id, 'delay', parseInt(e.target.value, 10))
+							updateRule(rule.id, 'delay', parseInt(e.target.value, 10) || 0)
 						}
 						placeholder="Задержка в миллисекундах"
 						min="0"
