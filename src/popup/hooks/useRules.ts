@@ -15,6 +15,7 @@ const useRules = () => {
 	const [rules, setRules] = useState<Rule[]>([
 		{
 			id: Date.now().toString(),
+			method: 'GET',
 			path: '',
 			data: '{"title": "Пример JSON ответа"}',
 			isActive: false,
@@ -47,6 +48,7 @@ const useRules = () => {
 	const addRule = useCallback(() => {
 		const newRule: Rule = {
 			id: Date.now().toString(),
+			method: 'GET',
 			path: '',
 			data: '{"title": "Пример JSON ответа"}',
 			isActive: false,
@@ -95,6 +97,7 @@ const useRules = () => {
 				rule.id === id
 					? {
 							...rule,
+							method: 'GET',
 							path: '',
 							data: '{"title": "Пример JSON ответа"}',
 							delay: 0,
@@ -115,6 +118,7 @@ const useRules = () => {
 	const resetState = useCallback(() => {
 		const initialRule: Rule = {
 			id: Date.now().toString(),
+			method: 'GET',
 			path: '',
 			data: '{"title": "Пример JSON ответа"}',
 			isActive: false,

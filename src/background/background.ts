@@ -14,7 +14,7 @@ declare global {
 
 /*
  * Функция для переопределения глобальной функции fetch.
- * Перехватывает все fetch-запросы и возвращает mock-данные, если URL соответствует одному из активных правил.
+ * Перехватывает все fetch-запросы и возвращает mock-данные, если URL и метод запроса соответствуют одному из активных правил.
  * Если для правила указана задержка (delay), она будет применена перед возвратом mock-ответа.
  * Если выбран тип ответа "redirect", выполняется ручной редирект с использованием window.location.href.
  * @param rules - Массив правил для перехвата запросов.
@@ -35,8 +35,15 @@ function overrideFetch(rules: Rule[]): void {
 				? input.href
 				: input.url;
 
+		const method = init?.method || 'GET';
+
 		for (const rule of rules) {
-			if (rule.isActive && rule.path && url.includes(rule.path)) {
+			if (
+				rule.isActive &&
+				rule.path &&
+				url.includes(rule.path) &&
+				rule.method === method
+			) {
 				if (rule.delay && rule.delay > 0) {
 					await new Promise((resolve) => setTimeout(resolve, rule.delay));
 				}
@@ -127,7 +134,6 @@ function updateIcon(isExtensionActive: boolean) {
 				128: 'assets/icons/inactive/icon128.png',
 		  };
 
-	// Устанавливаем новую иконку на расширение.
 	chrome.action.setIcon({ path: iconPath });
 }
 
@@ -137,7 +143,6 @@ function updateIcon(isExtensionActive: boolean) {
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action === 'updateRules') {
-		// Обновляем правила и сохраняем их в хранилище.
 		rules = message.rules;
 
 		chrome.storage.local.set({ rules }, () => {
