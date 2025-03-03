@@ -42,6 +42,15 @@ declare global {
 				callback: (activeInfo: { tabId: number; windowId: number }) => void
 			): void;
 		};
+		onUpdated: {
+			addListener(
+				callback: (
+					tabId: number,
+					changeInfo: { status?: string },
+					tab: any
+				) => void
+			): void;
+		};
 	}
 
 	interface ChromeScripting {

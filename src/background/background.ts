@@ -210,13 +210,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 /*
- * Обработчик события перехода на другую вкладку.
+ * Обработчик события смены вкладки.
  * Деактивирует расширение при смене вкладки.
  */
 chrome.tabs.onActivated.addListener((activeInfo) => {
 	chrome.storage.local.set({ isExtensionActive: false }, () => {
 		updateIcon(false);
+
+		chrome.scripting.executeScript({
+			target: { tabId: activeInfo.tabId },
+			func: restoreFetch,
+			world: 'MAIN',
+		});
 	});
+});
+
+/*
+ * Обработчик события загрузки страницы.
+ * Восстанавливает правила перехвата при загрузке новой страницы, если расширение активно.
+ */
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	if (changeInfo.status === 'complete') {
+		chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
+			if (result.rules && result.isExtensionActive) {
+				injectScript(result.rules, tabId);
+			}
+		});
+	}
 });
 
 /*
