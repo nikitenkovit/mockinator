@@ -1,0 +1,6 @@
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- Зеленый фон -->
+  <rect width="48" height="48" fill="#4CAF50" />
+  <!-- Белая буква "M" -->
+  <path d="M9 36V9H16.5L24 21L31.5 9H39V36H31.5V21L24 33L16.5 21V36H9Z" fill="white" />
+</svg>

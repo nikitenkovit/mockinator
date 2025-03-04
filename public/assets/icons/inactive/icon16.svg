@@ -1,0 +1,6 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Белый фон -->
+  <rect width="16" height="16" fill="white" />
+  <!-- Черная буква "M" -->
+  <path d="M3 12V3H5.5L8 7L10.5 3H13V12H10.5V7L8 11L5.5 7V12H3Z" fill="black" />
+</svg>
