@@ -1,6 +1,13 @@
 import { Rule } from '../types';
 
 let rules: Rule[] = [];
+let cachedIcons: {
+	active: { [size: number]: ImageData };
+	inactive: { [size: number]: ImageData };
+} = {
+	active: {},
+	inactive: {},
+};
 
 /*
  * Расширение глобального интерфейса Window для добавления кастомного свойства originalFetch.
@@ -157,6 +164,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				return;
 			}
 
+			// Устанавливаем активные иконки, если они есть в кэше
+			if (Object.keys(cachedIcons.active).length > 0) {
+				chrome.action.setIcon({
+					imageData: cachedIcons.active,
+				});
+			}
+
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
 				if (tabId) {
@@ -168,6 +182,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		chrome.storage.local.set({ isExtensionActive: false }, () => {
 			if (chrome.runtime.lastError) {
 				return;
+			}
+
+			// Устанавливаем неактивные иконки, если они есть в кэше
+			if (Object.keys(cachedIcons.inactive).length > 0) {
+				chrome.action.setIcon({
+					imageData: cachedIcons.inactive,
+				});
 			}
 
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -182,10 +203,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			});
 		});
 	} else if (message.action === 'updateIcon' && message.imageData) {
-		// Устанавливаем иконку с использованием imageData
-		chrome.action.setIcon({
-			imageData: message.imageData,
-		});
+		// Сохраняем иконки в кэше
+		cachedIcons.active = message.imageData.active;
+		cachedIcons.inactive = message.imageData.inactive;
+
+		// Устанавливаем активные иконки
+		if (Object.keys(cachedIcons.active).length > 0) {
+			chrome.action.setIcon({
+				imageData: cachedIcons.active,
+			});
+		}
 	}
 });
 
@@ -195,6 +222,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  */
 chrome.tabs.onActivated.addListener((activeInfo) => {
 	chrome.storage.local.set({ isExtensionActive: false }, () => {
+		// Устанавливаем неактивные иконки, если они есть в кэше
+		if (Object.keys(cachedIcons.inactive).length > 0) {
+			chrome.action.setIcon({
+				imageData: cachedIcons.inactive,
+			});
+		}
+
 		chrome.scripting.executeScript({
 			target: { tabId: activeInfo.tabId },
 			func: restoreFetch,
