@@ -1,5 +1,5 @@
 .container {
-	width: 400px;
+	width: 800px;
 	padding: 16px;
 	font-family: Arial, sans-serif;
 	background-color: #f9f9f9;
@@ -109,4 +109,24 @@
 
 .toggleSection input {
 	margin-left: 8px;
+}
+
+.importExportSection {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 20px;
+}
+
+.button {
+	padding: 10px 15px;
+	background-color: #4caf50;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.button:disabled {
+	background-color: #ccc;
+	cursor: not-allowed;
 }

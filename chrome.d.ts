@@ -67,7 +67,10 @@ declare global {
 
 	interface ChromeAction {
 		setIcon(
-			details: { path: string | { [key: number]: string } },
+			details: {
+				path?: string | { [key: number]: string };
+				imageData?: ImageData | { [key: number]: ImageData };
+			},
 			callback?: () => void
 		): void;
 	}

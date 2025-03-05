@@ -10,8 +10,10 @@ import { Rule } from '../../types';
  * - updateRule: Функция для обновления отдельного правила.
  * - clearRuleFields: Функция для очистки полей ввода для конкретного правила.
  * - resetState: Функция для сброса всех правил до начального состояния.
+ * - importRules: Функция для импорта правил из файла.
+ * - exportRules: Функция для экспорта правил в файл.
  */
-const useRules = () => {
+const useRules = (setError: (error: string) => void) => {
 	const [rules, setRules] = useState<Rule[]>([
 		{
 			id: Date.now().toString(),
@@ -144,6 +146,53 @@ const useRules = () => {
 		updateRules([initialRule]);
 	}, [updateRules]);
 
+	const generateFileName = () => {
+		const now = new Date();
+		const day = String(now.getDate()).padStart(2, '0');
+		const month = String(now.getMonth() + 1).padStart(2, '0');
+		const year = now.getFullYear();
+		const hours = String(now.getHours()).padStart(2, '0');
+		const minutes = String(now.getMinutes()).padStart(2, '0');
+		const seconds = String(now.getSeconds()).padStart(2, '0');
+		return `rules_${day}-${month}-${year}_${hours}-${minutes}-${seconds}.txt`;
+	};
+
+	const exportRules = useCallback(() => {
+		try {
+			const data = JSON.stringify(rules, null, 2);
+			const blob = new Blob([data], { type: 'text/plain' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = generateFileName();
+			a.click();
+			URL.revokeObjectURL(url);
+		} catch (error) {
+			setError('Ошибка при экспорте правил: ' + (error as Error).message);
+		}
+	}, [rules, setError]);
+
+	const importRules = useCallback(
+		(file: File) => {
+			const reader = new FileReader();
+			reader.onload = () => {
+				try {
+					const content = reader.result as string;
+					const parsedRules = JSON.parse(content) as Rule[];
+					setRules(parsedRules);
+					updateRules(parsedRules);
+				} catch (error) {
+					setError('Ошибка при импорте правил: ' + (error as Error).message);
+				}
+			};
+			reader.onerror = () => {
+				setError('Ошибка при чтении файла: ' + reader.error?.message);
+			};
+			reader.readAsText(file);
+		},
+		[setError, updateRules]
+	);
+
 	return {
 		rules,
 		addRule,
@@ -151,6 +200,8 @@ const useRules = () => {
 		updateRule,
 		clearRuleFields,
 		resetState,
+		importRules,
+		exportRules,
 	};
 };
 

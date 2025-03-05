@@ -15,5 +15,10 @@
 			"48": "assets/icons/inactive/icon48.png",
 			"128": "assets/icons/inactive/icon128.png"
 		}
+	},
+	"icons": {
+		"16": "assets/icons/inactive/icon16.png",
+		"48": "assets/icons/inactive/icon48.png",
+		"128": "assets/icons/inactive/icon128.png"
 	}
 }

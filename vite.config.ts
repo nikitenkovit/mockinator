@@ -24,11 +24,6 @@ export default defineConfig(
 			},
 			cssCodeSplit: false,
 		},
-		// TODO: Удалить, если не буду использовать
-		server: {
-			port: 3000,
-			open: true,
-		},
 		publicDir: 'public',
 	})
 );

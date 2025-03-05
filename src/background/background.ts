@@ -98,7 +98,6 @@ function overrideFetch(rules: Rule[]): void {
 function restoreFetch(): void {
 	if (window.originalFetch) {
 		window.fetch = window.originalFetch;
-	} else {
 	}
 }
 
@@ -125,27 +124,6 @@ async function injectScript(rules: Rule[], tabId: number): Promise<void> {
 			error: `Ошибка при внедрении скрипта: ${errorMessage}`,
 		});
 	}
-}
-
-/*
- * Функция для обновления иконки расширения.
- * Меняет иконку в зависимости от состояния расширения (активно/неактивно).
- * @param isExtensionActive - Флаг, указывающий, активно ли расширение.
- */
-function updateIcon(isExtensionActive: boolean) {
-	const iconPath = isExtensionActive
-		? {
-				16: 'assets/icons/active/icon16.png',
-				48: 'assets/icons/active/icon48.png',
-				128: 'assets/icons/active/icon128.png',
-		  }
-		: {
-				16: 'assets/icons/inactive/icon16.png',
-				48: 'assets/icons/inactive/icon48.png',
-				128: 'assets/icons/inactive/icon128.png',
-		  };
-
-	chrome.action.setIcon({ path: iconPath });
 }
 
 /*
@@ -178,7 +156,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				return;
 			}
 
-			updateIcon(true);
+			// Устанавливаем активную иконку
+			chrome.action.setIcon({
+				path: {
+					16: 'assets/icons/active/icon16.png',
+					48: 'assets/icons/active/icon48.png',
+					128: 'assets/icons/active/icon128.png',
+				},
+			});
 
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
@@ -193,7 +178,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				return;
 			}
 
-			updateIcon(false);
+			// Устанавливаем неактивную иконку
+			chrome.action.setIcon({
+				path: {
+					16: 'assets/icons/inactive/icon16.png',
+					48: 'assets/icons/inactive/icon48.png',
+					128: 'assets/icons/inactive/icon128.png',
+				},
+			});
 
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0]?.id;
@@ -215,7 +207,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  */
 chrome.tabs.onActivated.addListener((activeInfo) => {
 	chrome.storage.local.set({ isExtensionActive: false }, () => {
-		updateIcon(false);
+		// Устанавливаем неактивную иконку
+		chrome.action.setIcon({
+			path: {
+				16: 'assets/icons/inactive/icon16.png',
+				48: 'assets/icons/inactive/icon48.png',
+				128: 'assets/icons/inactive/icon128.png',
+			},
+		});
 
 		chrome.scripting.executeScript({
 			target: { tabId: activeInfo.tabId },
@@ -252,16 +251,14 @@ chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
 		rules = result.rules;
 	}
 
-	if (result.isExtensionActive !== undefined) {
-		updateIcon(result.isExtensionActive);
+	const isExtensionActive = result.isExtensionActive || false;
 
-		if (result.isExtensionActive) {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				const tabId = tabs[0]?.id;
-				if (tabId) {
-					injectScript(rules, tabId);
-				}
-			});
-		}
+	if (isExtensionActive) {
+		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			const tabId = tabs[0]?.id;
+			if (tabId) {
+				injectScript(rules, tabId);
+			}
+		});
 	}
 });

@@ -14,7 +14,9 @@ const Popup: React.FC = () => {
 		updateRule,
 		clearRuleFields,
 		resetState,
-	} = useRules();
+		importRules,
+		exportRules,
+	} = useRules(setError);
 	const { isExtensionActive, toggleExtension } = useExtensionState(
 		setError,
 		rules
@@ -30,6 +32,34 @@ const Popup: React.FC = () => {
 			</div>
 
 			{error && <div className={styles.error}>Ошибка: {error}</div>}
+
+			<div className={styles.importExportSection}>
+				<button
+					className={styles.button}
+					onClick={exportRules}
+					disabled={!isExtensionActive}
+				>
+					Экспорт правил
+				</button>
+				<button
+					className={styles.button}
+					onClick={() => {
+						const input = document.createElement('input');
+						input.type = 'file';
+						input.accept = '.txt';
+						input.onchange = (e) => {
+							const file = (e.target as HTMLInputElement).files?.[0];
+							if (file) {
+								importRules(file);
+							}
+						};
+						input.click();
+					}}
+					disabled={!isExtensionActive}
+				>
+					Импорт правил
+				</button>
+			</div>
 
 			<div className={styles.toggleSection}>
 				<label>
