@@ -20,6 +20,17 @@ const Rule: React.FC<RuleProps> = React.memo(
 		return (
 			<li key={rule.id} style={{ marginBottom: '10px' }}>
 				<label>
+					Название правила:
+					<input
+						type="text"
+						value={rule.name}
+						onChange={(e) => updateRule(rule.id, 'name', e.target.value)}
+						placeholder="Введите название правила"
+						disabled={!isExtensionActive}
+					/>
+				</label>
+
+				<label>
 					Метод:
 					<select
 						value={rule.method}
