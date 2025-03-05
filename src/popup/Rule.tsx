@@ -17,6 +17,14 @@ const Rule: React.FC<RuleProps> = React.memo(
 			xml: '<root><item>Пример XML ответа</item></root>',
 		};
 
+		// Проверка валидности полей PATH и DATA
+		const isPathValid = rule.path.length >= 5;
+		const isDataValid =
+			rule.responseType === 'success'
+				? rule.data && rule.data?.length >= 2
+				: true;
+		const isRuleValid = isPathValid && isDataValid;
+
 		return (
 			<li key={rule.id} style={{ marginBottom: '10px' }}>
 				<label>
@@ -56,6 +64,11 @@ const Rule: React.FC<RuleProps> = React.memo(
 						placeholder="Введите часть пути URL"
 						disabled={!isExtensionActive}
 					/>
+					{!isPathValid && (
+						<span style={{ color: 'red' }}>
+							Поле PATH должно содержать не менее 5 символов
+						</span>
+					)}
 				</label>
 
 				<label>
@@ -107,6 +120,11 @@ const Rule: React.FC<RuleProps> = React.memo(
 								placeholder="Введите mock-данные"
 								disabled={!isExtensionActive}
 							/>
+							{!isDataValid && (
+								<span style={{ color: 'red' }}>
+									Поле DATA должно содержать не менее 2 символов
+								</span>
+							)}
 						</label>
 					</>
 				)}
@@ -164,7 +182,7 @@ const Rule: React.FC<RuleProps> = React.memo(
 						type="checkbox"
 						checked={rule.isActive}
 						onChange={(e) => updateRule(rule.id, 'isActive', e.target.checked)}
-						disabled={!isExtensionActive}
+						disabled={!isExtensionActive || !isRuleValid}
 					/>
 				</label>
 
