@@ -17,6 +17,7 @@ const useRules = (setError: (error: string) => void) => {
 	const [rules, setRules] = useState<Rule[]>([
 		{
 			id: Date.now().toString(),
+			name: '', // Новое поле для названия правила
 			method: 'GET',
 			path: '',
 			data: '{"title": "Пример JSON ответа"}',
@@ -53,6 +54,7 @@ const useRules = (setError: (error: string) => void) => {
 	const addRule = useCallback(() => {
 		const newRule: Rule = {
 			id: Date.now().toString(),
+			name: '', // Новое поле для названия правила
 			method: 'GET',
 			path: '',
 			data: '{"title": "Пример JSON ответа"}',
@@ -105,6 +107,7 @@ const useRules = (setError: (error: string) => void) => {
 				rule.id === id
 					? {
 							...rule,
+							name: '', // Очищаем название правила
 							method: 'GET',
 							path: '',
 							data: '{"title": "Пример JSON ответа"}',
@@ -129,6 +132,7 @@ const useRules = (setError: (error: string) => void) => {
 	const resetState = useCallback(() => {
 		const initialRule: Rule = {
 			id: Date.now().toString(),
+			name: '', // Новое поле для названия правила
 			method: 'GET',
 			path: '',
 			data: '{"title": "Пример JSON ответа"}',
