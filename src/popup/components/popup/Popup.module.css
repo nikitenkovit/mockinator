@@ -1,0 +1,21 @@
+.main {
+  position: relative;
+  width: 800px;
+  height: 572px;
+  background-color: var(--main-background-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+  padding: 48px var(--primary-padding) var(--primary-padding);
+  outline: 1px solid green;
+}
+
+/* Все что ниже перебрать и удалить */
+
+.error {
+  color: #dc3545;
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}

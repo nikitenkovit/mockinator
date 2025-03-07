@@ -1,15 +1,18 @@
 {
-	"compilerOptions": {
-		"target": "ES6",
-		"module": "NodeNext",
-		"jsx": "react",
-		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"moduleResolution": "NodeNext",
-		"types": ["vite/client"],
-		"lib": ["es2017", "dom"]
-	},
-	"exclude": ["node_modules", "dist"]
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "NodeNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "NodeNext",
+    "types": ["vite/client"],
+    "lib": ["es2017", "dom"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
 }

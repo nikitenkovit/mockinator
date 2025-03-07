@@ -1,7 +1,7 @@
 import React from 'react';
-import { RuleProps } from '../types';
+import { RuleProps } from './rule.type';
 
-const Rule: React.FC<RuleProps> = React.memo(
+export const Rule: React.FC<RuleProps> = React.memo(
 	({
 		rule,
 		isExtensionActive,
@@ -205,5 +205,3 @@ const Rule: React.FC<RuleProps> = React.memo(
 		);
 	}
 );
-
-export default Rule;
