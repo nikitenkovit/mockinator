@@ -1,9 +1,10 @@
 import classNames from 'classnames';
 import React from 'react';
-import { FaPlus, FaRegCirclePlay } from 'react-icons/fa6';
+import { FaPlus } from 'react-icons/fa6';
 import { MdOutlineDeleteForever } from 'react-icons/md';
 import { useBoolean } from '../../hooks';
 import { AcceptModal } from '../acceptModal';
+import { Checkbox } from '../checkbox';
 import { Hint } from '../hint';
 import styles from './Header.module.css';
 import { HeaderProps } from './Header.type';
@@ -18,7 +19,7 @@ export const Header = React.memo((props: HeaderProps) => {
   } = props;
   const [isAcceptModalVisible, setAcceptModalVisible] = useBoolean(false);
 
-  const handleDeleteRules = () => {
+  const deleteRulesHandler = () => {
     onResetState();
     setAcceptModalVisible.off();
   };
@@ -30,7 +31,7 @@ export const Header = React.memo((props: HeaderProps) => {
           text="Удалить все правила?"
           acceptButtonText="Удалить"
           onClose={() => setAcceptModalVisible.off()}
-          onAccept={handleDeleteRules}
+          onAccept={deleteRulesHandler}
         />
       )}
       <button
@@ -47,19 +48,7 @@ export const Header = React.memo((props: HeaderProps) => {
               : 'Активировать расширение'
           }
         >
-          <label
-            className={classNames(styles.toolActive, {
-              [styles.active]: isExtensionActive,
-            })}
-          >
-            <FaRegCirclePlay size={24} />
-            <input
-              type="checkbox"
-              className="visually-hidden"
-              checked={isExtensionActive}
-              onChange={onToggleExtension}
-            />
-          </label>
+          <Checkbox checked={isExtensionActive} onChange={onToggleExtension} />
         </Hint>
         <Hint text={isExtensionActive ? 'Добавить правило' : undefined}>
           <button

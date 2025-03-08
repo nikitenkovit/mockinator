@@ -1,0 +1,57 @@
+.summaryContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.summaryToggle {
+  display: flex;
+  align-items: flex-start;
+  margin-right: 16px;
+  cursor: pointer;
+}
+
+.summaryInputContainer {
+  margin-right: auto;
+}
+
+.summaryTools {
+  display: flex;
+  gap: 16px;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: transparent;
+    transition: var(--main-transition);
+    cursor: pointer;
+
+    svg {
+      fill: var(--secondary-them-color);
+    }
+  }
+
+  button:hover svg {
+    fill: var(--white-color);
+  }
+}
+
+.toolRemove {
+  pointer-events: none;
+
+  &.active {
+    pointer-events: all;
+
+    svg {
+      fill: var(--danger-color);
+    }
+  }
+}
+
+.toolRemove:hover {
+  background-color: var(--danger-color);
+}

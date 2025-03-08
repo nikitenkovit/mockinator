@@ -7,8 +7,13 @@
 }
 
 .content {
-  padding: 48px var(--primary-padding) var(--primary-padding);
-  outline: 1px solid green;
+  padding-top: 48px;
+}
+
+.ruleItem {
+  &:not(:first-child) {
+    border-top: 1px solid var(--secondary-them-color);
+  }
 }
 
 /* Все что ниже перебрать и удалить */

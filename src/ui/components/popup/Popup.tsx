@@ -14,7 +14,6 @@ export const Popup: React.FC = () => {
     addRule,
     deleteRule,
     updateRule,
-    clearRuleFields,
     resetState,
     importRules,
     exportRules,
@@ -49,12 +48,11 @@ export const Popup: React.FC = () => {
 
         <ul>
           {rules.map((rule) => (
-            <li key={rule.id}>
+            <li key={rule.id} className={styles.ruleItem}>
               <Rule
                 rule={rule}
                 isExtensionActive={isExtensionActive}
                 updateRule={updateRule}
-                clearRuleFields={clearRuleFields}
                 deleteRule={deleteRule}
                 rulesCount={rules.length}
               />

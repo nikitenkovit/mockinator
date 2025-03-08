@@ -1,8 +1,9 @@
 :root {
-  --secondary-them-color: rgb(103, 103, 120);
   --primary-accent-color: #72b626;
+  --secondary-them-color: #cccccc;
   --secondary-accent-color: #4169e1;
   --main-background-color: rgb(239, 242, 245);
+  --primary-subtitle-color: rgb(103, 103, 120);
   --white-color: #ffffff;
   --black-color: #000000;
   --danger-color: #f72b1c;

@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from 'react';
  * - addRule: Функция для добавления нового правила.
  * - deleteRule: Функция для удаления правила.
  * - updateRule: Функция для обновления отдельного правила.
- * - clearRuleFields: Функция для очистки полей ввода для конкретного правила.
  * - resetState: Функция для сброса всех правил до начального состояния.
  * - importRules: Функция для импорта правил из файла.
  * - exportRules: Функция для экспорта правил в файл.
@@ -17,7 +16,7 @@ export const useRules = (setError: (error: string) => void) => {
   const [rules, setRules] = useState<Rule[]>([
     {
       id: Date.now().toString(),
-      name: '', // Новое поле для названия правила
+      name: '',
       method: 'GET',
       path: '',
       data: '{"title": "Пример JSON ответа"}',
@@ -54,7 +53,7 @@ export const useRules = (setError: (error: string) => void) => {
   const addRule = useCallback(() => {
     const newRule: Rule = {
       id: Date.now().toString(),
-      name: '', // Новое поле для названия правила
+      name: '',
       method: 'GET',
       path: '',
       data: '{"title": "Пример JSON ответа"}',
@@ -101,38 +100,10 @@ export const useRules = (setError: (error: string) => void) => {
     [rules, updateRules],
   );
 
-  const clearRuleFields = useCallback(
-    (id: string) => {
-      const newRules = rules.map((rule) =>
-        rule.id === id
-          ? {
-              ...rule,
-              name: '', // Очищаем название правила
-              method: 'GET',
-              path: '',
-              data: '{"title": "Пример JSON ответа"}',
-              delay: 0,
-              isActive: false,
-              responseType: 'success' as const,
-              successResponseType: 'json' as const,
-              errorResponse: JSON.stringify({
-                error: 'Bad Request',
-                message: 'Invalid data',
-              }),
-              redirectUrl: 'http://',
-            }
-          : rule,
-      );
-      setRules(newRules);
-      updateRules(newRules);
-    },
-    [rules, updateRules],
-  );
-
   const resetState = useCallback(() => {
     const initialRule: Rule = {
       id: Date.now().toString(),
-      name: '', // Новое поле для названия правила
+      name: '',
       method: 'GET',
       path: '',
       data: '{"title": "Пример JSON ответа"}',
@@ -202,7 +173,6 @@ export const useRules = (setError: (error: string) => void) => {
     addRule,
     deleteRule,
     updateRule,
-    clearRuleFields,
     resetState,
     importRules,
     exportRules,

@@ -17,8 +17,7 @@
   gap: 32px;
   height: 100%;
 
-  button,
-  label {
+  button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,19 +33,11 @@
     }
   }
 
-  button:hover svg,
-  label:hover svg {
+  button:hover svg {
     fill: var(--white-color);
   }
 }
 
-.toolActive {
-  &.active {
-    svg {
-      fill: var(--primary-accent-color);
-    }
-  }
-}
 .toolAdd {
   pointer-events: none;
 
@@ -70,9 +61,6 @@
   }
 }
 
-.toolActive:hover {
-  background-color: var(--primary-accent-color);
-}
 .toolAdd:hover {
   background-color: var(--primary-accent-color);
 }

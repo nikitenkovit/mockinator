@@ -1,0 +1,8 @@
+.container {
+  padding: var(--primary-padding);
+  background-color: var(--main-background-color);
+}
+
+.content {
+  padding: 16px 0 0 28px;
+}
