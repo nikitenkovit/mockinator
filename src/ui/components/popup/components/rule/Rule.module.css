@@ -1,6 +1,6 @@
 .container {
   padding: var(--primary-padding);
-  background-color: var(--main-background-color);
+  background-color: var(--primary-them-color);
 }
 
 .content {

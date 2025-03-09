@@ -6,6 +6,10 @@
   height: 24px;
 }
 
+.disabled {
+  pointer-events: none;
+}
+
 .slider {
   position: absolute;
   cursor: pointer;

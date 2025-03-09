@@ -9,13 +9,6 @@ export const Rule = React.memo((props: RuleProps) => {
   const { rule, isExtensionActive, updateRule, deleteRule, rulesCount } = props;
   const [isOpen, setIsOpen] = useBoolean(true);
 
-  const isPathValid = rule.path.length >= 5;
-  const isDataValid =
-    rule.responseType === 'success'
-      ? rule.data && rule.data?.length >= 2
-      : true;
-  const isRuleValid = Boolean(isPathValid && isDataValid);
-
   return (
     <details open={isOpen} className={styles.container}>
       <Summary
@@ -23,7 +16,6 @@ export const Rule = React.memo((props: RuleProps) => {
         isOpen={isOpen}
         onSetIsOpen={setIsOpen}
         rule={rule}
-        isRuleValid={isRuleValid}
         onDeleteRule={deleteRule}
         onUpdateRule={updateRule}
         rulesCount={rulesCount}
@@ -91,11 +83,6 @@ export const Rule = React.memo((props: RuleProps) => {
               placeholder="Введите mock-данные"
               disabled={!isExtensionActive}
             />
-            {/* {!isDataValid && (
-                <span style={{ color: 'red' }}>
-                  Поле DATA должно содержать не менее 2 символов
-                </span>
-              )} */}
           </>
         )}
 

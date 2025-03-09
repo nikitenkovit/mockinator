@@ -4,5 +4,6 @@ export * from './button';
 export * from './checkbox';
 export * from './header';
 export * from './hint';
+export * from './lineInput';
 export * from './modal';
 export * from './rule';

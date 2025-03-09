@@ -4,7 +4,6 @@ import { BooleanActions } from '@/ui/components/popup/hooks';
 export interface SummaryProps {
   rule: Rule;
   rulesCount: number;
-  isRuleValid: boolean;
   isOpen: boolean;
   onSetIsOpen: BooleanActions;
   isExtensionActive: boolean;

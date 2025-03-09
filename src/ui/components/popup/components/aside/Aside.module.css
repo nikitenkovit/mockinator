@@ -9,9 +9,9 @@
   width: 280px;
   height: 100%;
   padding: var(--primary-padding);
-  background-color: var(--main-background-color);
+  background-color: var(--primary-them-color);
   z-index: 10;
-  transition: var(--main-transition);
+  transition: 0.3s;
 }
 
 .visible {
@@ -42,7 +42,7 @@
   span {
     display: block;
     font-size: 14px;
-    color: var(--primary-subtitle-color);
+    color: var(--secondary-accent-color);
     margin: 16px 0 0;
   }
 }

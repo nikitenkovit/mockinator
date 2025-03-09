@@ -27,7 +27,7 @@
     height: 26px;
     border-radius: 50%;
     background-color: transparent;
-    transition: var(--main-transition);
+    transition: 0.3s;
     cursor: pointer;
 
     svg {

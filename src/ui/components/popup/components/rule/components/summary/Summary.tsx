@@ -5,6 +5,8 @@ import { MdOutlineDeleteForever } from 'react-icons/md';
 import { useBoolean } from '../../../../hooks';
 import { AcceptModal } from '../../../acceptModal';
 import { Checkbox } from '../../../checkbox';
+import { Hint } from '../../../hint';
+import { LineInput } from '../../../lineInput';
 import styles from './Summary.module.css';
 import { SummaryProps } from './Summary.type';
 
@@ -12,7 +14,6 @@ export const Summary = (props: SummaryProps) => {
   const {
     rule,
     rulesCount,
-    isRuleValid,
     isOpen,
     onSetIsOpen,
     isExtensionActive,
@@ -20,6 +21,8 @@ export const Summary = (props: SummaryProps) => {
     onDeleteRule,
   } = props;
   const [isAcceptModalVisible, setAcceptModalVisible] = useBoolean(false);
+
+  const isPathValid = rule.path.length >= 5;
 
   const summaryClickHandler = (event: React.MouseEvent<HTMLElement>) => {
     const isCheckbox = (event.currentTarget as HTMLElement)
@@ -55,29 +58,34 @@ export const Summary = (props: SummaryProps) => {
         </button>
 
         <div className={styles.summaryInputContainer}>
-          <input
+          <LineInput
             type="text"
             value={rule.path}
             onChange={(e) => onUpdateRule(rule.id, 'path', e.target.value)}
-            placeholder="Введите часть пути URL"
+            placeholder={rule.name || 'Путь. Например: example/path'}
+            width="524px"
             disabled={!isExtensionActive}
           />
-          {/* {!isPathValid && (
-        <span style={{ color: 'red' }}>
-          Поле PATH должно содержать не менее 5 символов
-        </span>
-      )} */}
         </div>
 
         <div className={styles.summaryTools}>
-          <Checkbox
-            id="checkbox-id"
-            checked={rule.isActive}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              onUpdateRule(rule.id, 'isActive', e.target.checked);
-            }}
-            disabled={!isExtensionActive || !isRuleValid}
-          />
+          <Hint
+            variant="red"
+            text={
+              !isPathValid &&
+              isExtensionActive &&
+              'В поле "Путь" должно быть не менее 5 символов'
+            }
+          >
+            <Checkbox
+              id="checkbox-id"
+              checked={rule.isActive}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                onUpdateRule(rule.id, 'isActive', e.target.checked);
+              }}
+              disabled={!isExtensionActive || !isPathValid}
+            />
+          </Hint>
 
           {rulesCount > 1 && (
             <button

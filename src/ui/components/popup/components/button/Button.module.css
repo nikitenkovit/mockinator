@@ -11,7 +11,7 @@
   border-radius: 30px;
   color: var(--black-color);
   cursor: pointer;
-  transition: var(--main-transition);
+  transition: 0.3s;
 }
 
 .button:hover,

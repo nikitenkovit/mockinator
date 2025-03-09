@@ -27,7 +27,7 @@ html:has(.modal[open]) {
   height: 100%;
   border-radius: 10px;
   padding-top: 40px;
-  background-color: var(--main-background-color);
+  background-color: var(--primary-them-color);
   overflow: scroll;
 }
 
