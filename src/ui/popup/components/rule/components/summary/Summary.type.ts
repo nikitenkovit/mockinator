@@ -1,5 +1,5 @@
 import { Rule } from '@/types';
-import { BooleanActions } from '@/ui/components/popup/hooks';
+import { BooleanActions } from '@/ui/hooks';
 
 export interface SummaryProps {
   rule: Rule;

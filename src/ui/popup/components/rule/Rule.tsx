@@ -1,3 +1,4 @@
+import { LineInput, LineSelect } from '@/ui/components';
 import { useBoolean } from '@/ui/hooks';
 import React from 'react';
 import { responseExamples } from './Rule.data';
@@ -22,41 +23,58 @@ export const Rule = React.memo((props: RuleProps) => {
       />
 
       <div className={styles.content}>
-        <input
-          type="text"
-          value={rule.name}
-          onChange={(e) => updateRule(rule.id, 'name', e.target.value)}
-          placeholder="Введите название правила"
-          disabled={!isExtensionActive}
-        />
+        <div className={styles.settingsContainer}>
+          <LineInput
+            type="text"
+            value={rule.name}
+            onChange={(e) => updateRule(rule.id, 'name', e.target.value)}
+            placeholder={'Название'}
+            disabled={!isExtensionActive}
+          />
 
-        <select
-          value={rule.method}
-          onChange={(e) => updateRule(rule.id, 'method', e.target.value)}
-          disabled={!isExtensionActive}
-        >
-          <option value="GET">GET</option>
-          <option value="POST">POST</option>
-          <option value="PUT">PUT</option>
-          <option value="DELETE">DELETE</option>
-          <option value="PATCH">PATCH</option>
-          <option value="HEAD">HEAD</option>
-          <option value="OPTIONS">OPTIONS</option>
-        </select>
+          <LineInput
+            type="number"
+            step={100}
+            value={rule.delay ?? 0}
+            min="0"
+            onChange={(e) =>
+              updateRule(rule.id, 'delay', parseInt(e.target.value, 10) || 0)
+            }
+            placeholder="Задержка(мс)"
+            disabled={!isExtensionActive}
+          />
 
-        <select
-          value={rule.responseType}
-          onChange={(e) => updateRule(rule.id, 'responseType', e.target.value)}
-          disabled={!isExtensionActive}
-        >
-          <option value="success">Успешный ответ (200)</option>
-          <option value="error">Ошибка (400)</option>
-          <option value="redirect">Редирект (301/302)</option>
-        </select>
+          <LineSelect
+            value={rule.method}
+            onChange={(e) => updateRule(rule.id, 'method', e.target.value)}
+            disabled={!isExtensionActive}
+            placeholder="Метод"
+          >
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+            <option value="PATCH">PATCH</option>
+            <option value="HEAD">HEAD</option>
+            <option value="OPTIONS">OPTIONS</option>
+          </LineSelect>
+        </div>
 
-        {rule.responseType === 'success' && (
-          <>
-            <select
+        <div className={styles.selectResponseTypeContainer}>
+          <LineSelect
+            value={rule.responseType}
+            onChange={(e) =>
+              updateRule(rule.id, 'responseType', e.target.value)
+            }
+            disabled={!isExtensionActive}
+            placeholder="Тип ответа"
+          >
+            <option value="success">Успешный ответ (200)</option>
+            <option value="error">Ошибка (400)</option>
+            <option value="redirect">Редирект (301/302)</option>
+          </LineSelect>
+          {rule.responseType === 'success' && (
+            <LineSelect
               value={rule.successResponseType}
               onChange={(e) => {
                 const newType = e.target.value as
@@ -70,60 +88,45 @@ export const Rule = React.memo((props: RuleProps) => {
                 });
               }}
               disabled={!isExtensionActive}
+              placeholder="Тип успешного ответа"
             >
               <option value="json">JSON</option>
               <option value="text">Text</option>
               <option value="html">HTML</option>
               <option value="xml">XML</option>
-            </select>
-            DATA:
-            <textarea
-              value={rule.data || ''}
-              onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
-              placeholder="Введите mock-данные"
-              disabled={!isExtensionActive}
-            />
-          </>
+            </LineSelect>
+          )}
+        </div>
+
+        {rule.responseType === 'success' && (
+          <textarea
+            value={rule.data || ''}
+            onChange={(e) => updateRule(rule.id, 'data', e.target.value)}
+            placeholder="Введите mock-данные"
+            disabled={!isExtensionActive}
+          />
         )}
 
         {rule.responseType === 'error' && (
-          <div>
-            <textarea
-              value={rule.errorResponse || ''}
-              onChange={(e) =>
-                updateRule(rule.id, 'errorResponse', e.target.value)
-              }
-              placeholder="Введите JSON-ответ на ошибку"
-              disabled={!isExtensionActive}
-            />
-          </div>
+          <textarea
+            value={rule.errorResponse || ''}
+            onChange={(e) =>
+              updateRule(rule.id, 'errorResponse', e.target.value)
+            }
+            placeholder="Введите JSON-ответ на ошибку"
+            disabled={!isExtensionActive}
+          />
         )}
 
         {rule.responseType === 'redirect' && (
-          <div>
-            <input
-              type="text"
-              value={rule.redirectUrl || ''}
-              onChange={(e) =>
-                updateRule(rule.id, 'redirectUrl', e.target.value)
-              }
-              placeholder="URL для редиректа"
-              disabled={!isExtensionActive}
-            />
-          </div>
+          <input
+            type="text"
+            value={rule.redirectUrl || ''}
+            onChange={(e) => updateRule(rule.id, 'redirectUrl', e.target.value)}
+            placeholder="URL для редиректа"
+            disabled={!isExtensionActive}
+          />
         )}
-
-        <input
-          type="number"
-          step={100}
-          value={rule.delay ?? ''}
-          onChange={(e) =>
-            updateRule(rule.id, 'delay', parseInt(e.target.value, 10) || 0)
-          }
-          placeholder="Задержка в миллисекундах"
-          min="0"
-          disabled={!isExtensionActive}
-        />
       </div>
     </details>
   );

@@ -1,28 +1,31 @@
 import classNames from 'classnames';
-import styles from './LineInput.module.css';
-import { LineInputProps } from './LineInput.type';
+import styles from './lineSelect.module.css';
+import { LineSelectProps } from './LineSelect.type';
 
-export const LineInput = ({
+export const LineSelect = ({
   width,
   placeholder,
   value,
   disabled,
+  children,
   ...rest
-}: LineInputProps) => {
+}: LineSelectProps) => {
   return (
     <label
       style={{ width: `${width || '100%'}` }}
       className={classNames(styles.container, { [styles.disabled]: disabled })}
     >
-      <input
+      <select
         className={styles.input}
         value={value}
         disabled={disabled}
         {...rest}
-      />
+      >
+        {children}
+      </select>
       <span
         className={classNames(styles.placeholder, {
-          [styles.placeholderTop]: !!value || value === 0 || value === '0',
+          [styles.placeholderTop]: !!value,
         })}
       >
         {placeholder}

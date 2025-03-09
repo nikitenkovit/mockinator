@@ -4,5 +4,20 @@
 }
 
 .content {
+  display: grid;
+  gap: 16px;
   padding: 16px 0 0 28px;
+}
+
+.settingsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 524px;
+}
+
+.selectResponseTypeContainer {
+  display: flex;
+  gap: 16px;
+  width: 524px;
 }

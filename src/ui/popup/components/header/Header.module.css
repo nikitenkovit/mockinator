@@ -11,64 +11,6 @@
   z-index: 2;
 }
 
-.tools {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 32px;
-  height: 100%;
-
-  button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background-color: transparent;
-    transition: 0.3s;
-    cursor: pointer;
-
-    svg {
-      fill: var(--secondary-them-color);
-    }
-  }
-
-  button:hover svg {
-    fill: var(--white-color);
-  }
-}
-
-.toolAdd {
-  pointer-events: none;
-
-  &.active {
-    pointer-events: all;
-
-    svg {
-      fill: var(--primary-accent-color);
-    }
-  }
-}
-.toolRemove {
-  pointer-events: none;
-
-  &.active {
-    pointer-events: all;
-
-    svg {
-      fill: var(--danger-color);
-    }
-  }
-}
-
-.toolAdd:hover {
-  background-color: var(--primary-accent-color);
-}
-.toolRemove:hover {
-  background-color: var(--danger-color);
-}
-
 .openMenuButton {
   position: absolute;
   top: 50%;
@@ -99,4 +41,64 @@
     height: 2px;
     background-color: black;
   }
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 32px;
+  height: 100%;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: transparent;
+    transition: 0.4s;
+    cursor: pointer;
+
+    svg {
+      fill: var(--secondary-them-color);
+    }
+  }
+
+  button:hover svg {
+    fill: var(--white-color);
+  }
+}
+
+.toolAdd {
+  transition: 0.4s;
+  pointer-events: none;
+
+  &.active {
+    pointer-events: all;
+
+    svg {
+      fill: var(--primary-accent-color);
+    }
+  }
+}
+.toolRemove {
+  transition: 0.4s;
+  pointer-events: none;
+
+  &.active {
+    pointer-events: all;
+
+    svg {
+      fill: var(--danger-color);
+    }
+  }
+}
+
+.toolAdd:hover {
+  background-color: var(--primary-accent-color);
+}
+.toolRemove:hover {
+  background-color: var(--danger-color);
 }

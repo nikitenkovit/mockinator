@@ -1,4 +1,4 @@
-import { BooleanActions } from '../../hooks';
+import { BooleanActions } from '@/ui/hooks';
 
 export interface HeaderProps {
   onSetIsAsideVisible: BooleanActions;
