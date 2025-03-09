@@ -1,3 +1,5 @@
+import { ResponseSuccessTypeEnum, ResponseTypeEnum } from '@/constants';
+
 /*
  * Интерфейс для описания правил перехвата запросов.
  * Каждое правило содержит:
@@ -14,24 +16,24 @@
  * - redirectUrl: URL для редиректа.
  */
 export interface Rule {
-	id: string;
-	name: string;
-	method: string;
-	path: string;
-	data?: string;
-	isActive: boolean;
-	delay?: number;
-	responseType: 'success' | 'error' | 'redirect';
-	successResponseType?: 'json' | 'text' | 'html' | 'xml';
-	errorResponse?: string;
-	redirectUrl?: string;
+  id: string;
+  name: string;
+  method: string;
+  path: string;
+  data?: string;
+  isActive: boolean;
+  delay?: number;
+  responseType: ResponseTypeEnum;
+  successResponseType?: ResponseSuccessTypeEnum;
+  errorResponse?: string;
+  redirectUrl?: string;
 }
 
 /*
  * Интерфейс для сообщений, отправляемых между popup и background.
  */
 export interface ExtensionMessage {
-	action: 'updateRules' | 'activateExtension' | 'deactivateExtension' | 'error';
-	rules?: Rule[];
-	error?: string;
+  action: 'updateRules' | 'activateExtension' | 'deactivateExtension' | 'error';
+  rules?: Rule[];
+  error?: string;
 }

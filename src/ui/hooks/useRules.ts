@@ -1,3 +1,4 @@
+import { ResponseSuccessTypeEnum, ResponseTypeEnum } from '@/constants';
 import { Rule } from '@/types';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -22,8 +23,8 @@ export const useRules = (setError: (error: string) => void) => {
       data: '{"title": "Пример JSON ответа"}',
       isActive: false,
       delay: 0,
-      responseType: 'success' as const,
-      successResponseType: 'json' as const,
+      responseType: ResponseTypeEnum.Success,
+      successResponseType: ResponseSuccessTypeEnum.JSON,
       errorResponse: JSON.stringify({
         error: 'Bad Request',
         message: 'Invalid data',
@@ -59,8 +60,8 @@ export const useRules = (setError: (error: string) => void) => {
       data: '{"title": "Пример JSON ответа"}',
       isActive: false,
       delay: 0,
-      responseType: 'success' as const,
-      successResponseType: 'json' as const,
+      responseType: ResponseTypeEnum.Success,
+      successResponseType: ResponseSuccessTypeEnum.JSON,
       errorResponse: JSON.stringify({
         error: 'Bad Request',
         message: 'Invalid data',
@@ -109,8 +110,8 @@ export const useRules = (setError: (error: string) => void) => {
       data: '{"title": "Пример JSON ответа"}',
       isActive: false,
       delay: 0,
-      responseType: 'success' as const,
-      successResponseType: 'json' as const,
+      responseType: ResponseTypeEnum.Success,
+      successResponseType: ResponseSuccessTypeEnum.JSON,
       errorResponse: JSON.stringify({
         error: 'Bad Request',
         message: 'Invalid data',

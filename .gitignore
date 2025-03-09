@@ -1,9 +1,11 @@
 # dependencies
 /node_modules
 
+# development
+/dev
+
 # production
 /dist
-/dev
 
 # misc
 .DS_Store

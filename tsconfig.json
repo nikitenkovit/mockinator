@@ -7,7 +7,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "NodeNext",
     "types": ["vite/client"],
     "lib": ["es2017", "dom"],
     "paths": {

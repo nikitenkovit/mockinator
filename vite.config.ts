@@ -26,6 +26,7 @@ export default defineConfig(
         },
         output: {
           entryFileNames: '[name].js',
+          format: 'esm',
           assetFileNames: 'assets/[name].[ext]',
         },
       },
