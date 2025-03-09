@@ -1,0 +1,104 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  padding: var(--primary-padding);
+  text-align: center;
+  background-color: var(--white-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.openMenuButton {
+  position: absolute;
+  top: 50%;
+  left: var(--primary-padding);
+  transform: translateY(-50%);
+  width: 23px;
+  height: 16px;
+  background-color: transparent;
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 23px;
+    height: 2px;
+    background-color: black;
+    box-shadow: 0 7px 0 0 black;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 23px;
+    height: 2px;
+    background-color: black;
+  }
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 32px;
+  height: 100%;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: transparent;
+    transition: 0.4s;
+    cursor: pointer;
+
+    svg {
+      fill: var(--secondary-them-color);
+    }
+  }
+
+  button:hover svg {
+    fill: var(--white-color);
+  }
+}
+
+.toolAdd {
+  transition: 0.4s;
+  pointer-events: none;
+
+  &.active {
+    pointer-events: all;
+
+    svg {
+      fill: var(--primary-accent-color);
+    }
+  }
+}
+.toolRemove {
+  transition: 0.4s;
+  pointer-events: none;
+
+  &.active {
+    pointer-events: all;
+
+    svg {
+      fill: var(--danger-color);
+    }
+  }
+}
+
+.toolAdd:hover {
+  background-color: var(--primary-accent-color);
+}
+.toolRemove:hover {
+  background-color: var(--danger-color);
+}

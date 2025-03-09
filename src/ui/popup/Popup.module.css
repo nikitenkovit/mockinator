@@ -1,0 +1,26 @@
+.main {
+  position: relative;
+  width: 800px;
+  height: 572px;
+  background-color: var(--primary-them-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+  padding-top: 48px;
+}
+
+.ruleItem {
+  &:not(:first-child) {
+    border-top: 1px solid var(--secondary-them-color);
+  }
+}
+
+/* Все что ниже перебрать и удалить */
+
+.error {
+  color: #dc3545;
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
