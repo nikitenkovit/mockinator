@@ -1,10 +1,17 @@
 import react from '@vitejs/plugin-react';
-import vite from 'vite';
-const { defineConfig } = vite;
+import path from 'path';
+import { defineConfig } from 'vite';
+
+const __dirname = path.resolve();
 
 export default defineConfig(
   ({ mode }: { mode: 'development' | 'production' }) => ({
     plugins: [react()],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+      },
+    },
     css: {
       modules: {
         localsConvention: 'camelCase',

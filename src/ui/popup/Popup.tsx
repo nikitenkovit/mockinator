@@ -1,10 +1,10 @@
-import { Aside, Header, Rule } from './components';
 import {
   useBoolean,
   useErrorHandling,
   useExtensionState,
   useRules,
-} from './hooks';
+} from '../hooks';
+import { Aside, Header, Rule } from './components';
 import styles from './Popup.module.css';
 
 export const Popup: React.FC = () => {

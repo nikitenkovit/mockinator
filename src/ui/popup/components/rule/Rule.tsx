@@ -1,5 +1,5 @@
+import { useBoolean } from '@/ui/hooks';
 import React from 'react';
-import { useBoolean } from '../../hooks';
 import { responseExamples } from './Rule.data';
 import styles from './Rule.module.css';
 import { RuleProps } from './Rule.type';

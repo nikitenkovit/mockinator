@@ -1,12 +1,9 @@
+import { AcceptModal, Checkbox, Hint, LineInput } from '@/ui/components';
+import { useBoolean } from '@/ui/hooks';
 import classNames from 'classnames';
 import React from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { MdOutlineDeleteForever } from 'react-icons/md';
-import { useBoolean } from '../../../../hooks';
-import { AcceptModal } from '../../../acceptModal';
-import { Checkbox } from '../../../checkbox';
-import { Hint } from '../../../hint';
-import { LineInput } from '../../../lineInput';
 import styles from './Summary.module.css';
 import { SummaryProps } from './Summary.type';
 

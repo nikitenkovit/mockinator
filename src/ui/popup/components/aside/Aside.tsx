@@ -1,8 +1,7 @@
+import { Button, Modal } from '@/ui/components';
+import { useBoolean } from '@/ui/hooks';
 import classNames from 'classnames';
 import React from 'react';
-import { useBoolean } from '../../hooks';
-import { Button } from '../button';
-import { Modal } from '../modal';
 import styles from './Aside.module.css';
 import { AsideProps } from './Aside.type';
 import { About } from './components';

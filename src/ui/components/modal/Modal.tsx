@@ -1,6 +1,6 @@
+import { useBoolean } from '@/ui/hooks';
 import React, { type ElementRef, MouseEvent, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useBoolean } from '../../hooks';
 import styles from './Modal.module.css';
 
 export function Modal({

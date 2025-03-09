@@ -1,11 +1,9 @@
+import { AcceptModal, Checkbox, Hint } from '@/ui/components';
+import { useBoolean } from '@/ui/hooks';
 import classNames from 'classnames';
 import React from 'react';
 import { FaPlus } from 'react-icons/fa6';
 import { MdOutlineDeleteForever } from 'react-icons/md';
-import { useBoolean } from '../../hooks';
-import { AcceptModal } from '../acceptModal';
-import { Checkbox } from '../checkbox';
-import { Hint } from '../hint';
 import styles from './Header.module.css';
 import { HeaderProps } from './Header.type';
 
