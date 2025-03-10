@@ -1,7 +1,7 @@
-import { Rule } from '../types';
+import { RulesState } from '../types';
 
 // Эти enum дублируются из constants/response.ts, чтобы избежать проблем с импортом в Chrome Extensions.
-// FIXMEL вернуться к решению с importScripts или перейти на другой подход.
+// FIXME: вернуться к решению с importScripts или перейти на другой подход.
 enum ResponseTypeEnum {
   Success = 'SUCCESS',
   Error = 'ERROR',
@@ -14,7 +14,10 @@ enum ResponseSuccessTypeEnum {
   XML = 'XML',
 }
 
-let rules: Rule[] = [];
+let rulesState: RulesState = {
+  entities: {},
+  ruleIds: [],
+};
 
 /*
  * Расширение глобального интерфейса Window для добавления кастомного свойства originalFetch.
@@ -31,9 +34,9 @@ declare global {
  * Перехватывает все fetch-запросы и возвращает mock-данные, если URL и метод запроса соответствуют одному из активных правил.
  * Если для правила указана задержка (delay), она будет применена перед возвратом mock-ответа.
  * Если выбран тип ответа "redirect", выполняется ручной редирект с использованием window.location.href.
- * @param rules - Массив правил для перехвата запросов.
+ * @param rulesState - Состояние правил для перехвата запросов.
  */
-function overrideFetch(rules: Rule[]): void {
+function overrideFetch(rulesState: RulesState): void {
   if (!window.originalFetch) {
     window.originalFetch = window.fetch;
   }
@@ -51,7 +54,8 @@ function overrideFetch(rules: Rule[]): void {
 
     const method = init?.method || 'GET';
 
-    for (const rule of rules) {
+    for (const ruleId of rulesState.ruleIds) {
+      const rule = rulesState.entities[ruleId];
       if (
         rule.isActive &&
         rule.path &&
@@ -118,15 +122,18 @@ function restoreFetch(): void {
 /*
  * Функция для внедрения скрипта в активную вкладку.
  * Внедряет функцию overrideFetch в контекст активной вкладки.
- * @param rules - Массив правил для перехвата запросов.
+ * @param rulesState - Состояние правил для перехвата запросов.
  * @param tabId - Идентификатор вкладки, в которую нужно внедрить скрипт.
  */
-async function injectScript(rules: Rule[], tabId: number): Promise<void> {
+async function injectScript(
+  rulesState: RulesState,
+  tabId: number,
+): Promise<void> {
   try {
     await chrome.scripting.executeScript({
       target: { tabId },
       func: overrideFetch,
-      args: [rules],
+      args: [rulesState],
       world: 'MAIN',
     });
   } catch (error) {
@@ -146,9 +153,9 @@ async function injectScript(rules: Rule[], tabId: number): Promise<void> {
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'updateRules') {
-    rules = message.rules;
+    rulesState = message.rules;
 
-    chrome.storage.local.set({ rules }, () => {
+    chrome.storage.local.set({ rules: rulesState }, () => {
       if (chrome.runtime.lastError) {
         return;
       }
@@ -158,7 +165,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const tabId = tabs[0]?.id;
             if (tabId) {
-              injectScript(rules, tabId);
+              injectScript(rulesState, tabId);
             }
           });
         }
@@ -170,7 +177,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-      // Устанавливаем активную иконку
       chrome.action.setIcon({
         path: {
           16: 'assets/icons/active/icon16.png',
@@ -192,7 +198,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-      // Устанавливаем неактивную иконку
       chrome.action.setIcon({
         path: {
           16: 'assets/icons/inactive/icon16.png',
@@ -221,7 +226,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  */
 chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.storage.local.set({ isExtensionActive: false }, () => {
-    // Устанавливаем неактивную иконку
     chrome.action.setIcon({
       path: {
         16: 'assets/icons/inactive/icon16.png',
@@ -262,7 +266,7 @@ chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
   }
 
   if (result.rules) {
-    rules = result.rules;
+    rulesState = result.rules;
   }
 
   const isExtensionActive = result.isExtensionActive || false;
@@ -271,7 +275,7 @@ chrome.storage.local.get(['rules', 'isExtensionActive'], (result) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const tabId = tabs[0]?.id;
       if (tabId) {
-        injectScript(rules, tabId);
+        injectScript(rulesState, tabId);
       }
     });
   }

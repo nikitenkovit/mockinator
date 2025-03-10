@@ -1,11 +1,11 @@
 import { ResponseSuccessTypeEnum, ResponseTypeEnum } from '@/constants';
-import { Rule } from '@/types';
+import { Rule, RulesState } from '@/types';
 import { useCallback, useEffect, useState } from 'react';
 
-/*
+/**
  * Кастомный хук для управления правилами перехвата запросов.
  * Возвращает:
- * - rules: Массив правил.
+ * - rulesState: Состояние правил (entities и ruleIds).
  * - addRule: Функция для добавления нового правила.
  * - deleteRule: Функция для удаления правила.
  * - updateRule: Функция для обновления отдельного правила.
@@ -14,40 +14,29 @@ import { useCallback, useEffect, useState } from 'react';
  * - exportRules: Функция для экспорта правил в файл.
  */
 export const useRules = (setError: (error: string) => void) => {
-  const [rules, setRules] = useState<Rule[]>([
-    {
-      id: Date.now().toString(),
-      name: '',
-      method: 'GET',
-      path: '',
-      data: '{"title": "Пример JSON ответа"}',
-      isActive: false,
-      delay: 0,
-      responseType: ResponseTypeEnum.Success,
-      successResponseType: ResponseSuccessTypeEnum.JSON,
-      errorResponse: JSON.stringify({
-        error: 'Bad Request',
-        message: 'Invalid data',
-      }),
-      redirectUrl: 'http://',
-    },
-  ]);
+  const [rulesState, setRulesState] = useState<RulesState>({
+    entities: {},
+    ruleIds: [],
+  });
 
   useEffect(() => {
     chrome.storage.local.get(['rules'], (result) => {
       if (result.rules) {
-        setRules(result.rules);
+        setRulesState(result.rules);
       }
     });
   }, []);
 
-  const updateRules = useCallback((newRules: Rule[]) => {
-    chrome.storage.local.set({ rules: newRules }, () => {
+  const updateRules = useCallback((newRulesState: RulesState) => {
+    chrome.storage.local.set({ rules: newRulesState }, () => {
       if (chrome.runtime.lastError) {
         return;
       }
 
-      chrome.runtime.sendMessage({ action: 'updateRules', rules: newRules });
+      chrome.runtime.sendMessage({
+        action: 'updateRules',
+        rules: newRulesState,
+      });
     });
   }, []);
 
@@ -68,18 +57,28 @@ export const useRules = (setError: (error: string) => void) => {
       }),
       redirectUrl: 'http://',
     };
-    const newRules = [...rules, newRule];
-    setRules(newRules);
-    updateRules(newRules);
-  }, [rules, updateRules]);
+
+    const newRulesState: RulesState = {
+      entities: { ...rulesState.entities, [newRule.id]: newRule },
+      ruleIds: [...rulesState.ruleIds, newRule.id],
+    };
+
+    setRulesState(newRulesState);
+    updateRules(newRulesState);
+  }, [rulesState, updateRules]);
 
   const deleteRule = useCallback(
     (id: string) => {
-      const newRules = rules.filter((rule) => rule.id !== id);
-      setRules(newRules);
-      updateRules(newRules);
+      const { [id]: _, ...remainingEntities } = rulesState.entities;
+      const newRulesState: RulesState = {
+        entities: remainingEntities,
+        ruleIds: rulesState.ruleIds.filter((ruleId) => ruleId !== id),
+      };
+
+      setRulesState(newRulesState);
+      updateRules(newRulesState);
     },
-    [rules, updateRules],
+    [rulesState, updateRules],
   );
 
   const updateRule = useCallback(
@@ -88,38 +87,30 @@ export const useRules = (setError: (error: string) => void) => {
       field: keyof Rule | Partial<Rule>,
       value?: string | boolean | number,
     ) => {
-      const newRules = rules.map((rule) =>
-        rule.id === id
-          ? typeof field !== 'object'
-            ? { ...rule, [field]: value }
-            : { ...rule, ...field }
-          : rule,
-      );
-      setRules(newRules);
-      updateRules(newRules);
+      const updatedRule = {
+        ...rulesState.entities[id],
+        ...(typeof field !== 'object' ? { [field]: value } : field),
+      };
+
+      const newRulesState: RulesState = {
+        entities: { ...rulesState.entities, [id]: updatedRule },
+        ruleIds: rulesState.ruleIds,
+      };
+
+      setRulesState(newRulesState);
+      updateRules(newRulesState);
     },
-    [rules, updateRules],
+    [rulesState, updateRules],
   );
 
   const resetState = useCallback(() => {
-    const initialRule: Rule = {
-      id: Date.now().toString(),
-      name: '',
-      method: 'GET',
-      path: '',
-      data: '{"title": "Пример JSON ответа"}',
-      isActive: false,
-      delay: 0,
-      responseType: ResponseTypeEnum.Success,
-      successResponseType: ResponseSuccessTypeEnum.JSON,
-      errorResponse: JSON.stringify({
-        error: 'Bad Request',
-        message: 'Invalid data',
-      }),
-      redirectUrl: 'http://',
+    const newRulesState: RulesState = {
+      entities: {},
+      ruleIds: [],
     };
-    setRules([initialRule]);
-    updateRules([initialRule]);
+
+    setRulesState(newRulesState);
+    updateRules(newRulesState);
   }, [updateRules]);
 
   const generateFileName = () => {
@@ -135,7 +126,7 @@ export const useRules = (setError: (error: string) => void) => {
 
   const exportRules = useCallback(() => {
     try {
-      const data = JSON.stringify(rules, null, 2);
+      const data = JSON.stringify(rulesState, null, 2);
       const blob = new Blob([data], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -146,7 +137,7 @@ export const useRules = (setError: (error: string) => void) => {
     } catch (error) {
       setError('Ошибка при экспорте правил: ' + (error as Error).message);
     }
-  }, [rules, setError]);
+  }, [rulesState, setError]);
 
   const importRules = useCallback(
     (file: File) => {
@@ -154,9 +145,9 @@ export const useRules = (setError: (error: string) => void) => {
       reader.onload = () => {
         try {
           const content = reader.result as string;
-          const parsedRules = JSON.parse(content) as Rule[];
-          setRules(parsedRules);
-          updateRules(parsedRules);
+          const parsedRulesState = JSON.parse(content) as RulesState;
+          setRulesState(parsedRulesState);
+          updateRules(parsedRulesState);
         } catch (error) {
           setError('Ошибка при импорте правил: ' + (error as Error).message);
         }
@@ -170,7 +161,7 @@ export const useRules = (setError: (error: string) => void) => {
   );
 
   return {
-    rules,
+    rulesState,
     addRule,
     deleteRule,
     updateRule,

@@ -10,7 +10,7 @@ import styles from './Popup.module.css';
 export const Popup: React.FC = () => {
   const { error, setError } = useErrorHandling();
   const {
-    rules,
+    rulesState,
     addRule,
     deleteRule,
     updateRule,
@@ -20,7 +20,7 @@ export const Popup: React.FC = () => {
   } = useRules(setError);
   const { isExtensionActive, toggleExtension } = useExtensionState(
     setError,
-    rules,
+    rulesState,
   );
   const [isAsideVisible, setIsAsideVisible] = useBoolean(false);
 
@@ -38,6 +38,7 @@ export const Popup: React.FC = () => {
 
       <Aside
         visible={isAsideVisible}
+        rulesState={rulesState}
         onImportRules={importRules}
         onExportRules={exportRules}
         onVisibleChange={() => setIsAsideVisible.off()}
@@ -47,14 +48,14 @@ export const Popup: React.FC = () => {
         {error && <div className={styles.error}>Ошибка: {error}</div>}
 
         <ul>
-          {rules.map((rule) => (
-            <li key={rule.id} className={styles.ruleItem}>
+          {rulesState.ruleIds.map((ruleId) => (
+            <li key={ruleId} className={styles.ruleItem}>
               <Rule
-                rule={rule}
+                rule={rulesState.entities[ruleId]}
                 isExtensionActive={isExtensionActive}
                 updateRule={updateRule}
                 deleteRule={deleteRule}
-                rulesCount={rules.length}
+                rulesCount={rulesState.ruleIds.length}
               />
             </li>
           ))}

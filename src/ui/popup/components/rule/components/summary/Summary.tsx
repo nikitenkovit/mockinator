@@ -1,4 +1,5 @@
-import { AcceptModal, Checkbox, Hint, LineInput } from '@/ui/components';
+import { MapMethodToBadgeColorText } from '@/constants';
+import { AcceptModal, Badge, Checkbox, Hint, LineInput } from '@/ui/components';
 import { useBoolean } from '@/ui/hooks';
 import classNames from 'classnames';
 import React from 'react';
@@ -59,19 +60,22 @@ export const Summary = (props: SummaryProps) => {
             type="text"
             value={rule.path}
             onChange={(e) => onUpdateRule(rule.id, 'path', e.target.value)}
-            placeholder={rule.name || 'Путь. Например: example/path'}
+            placeholder={rule.name || 'Путь. Например: /api/data'}
             width="524px"
             disabled={!isExtensionActive}
           />
+          <Badge color={MapMethodToBadgeColorText[rule.method]}>
+            {rule.method}
+          </Badge>
         </div>
 
         <div className={styles.summaryTools}>
           <Hint
-            variant="red"
+            variant={!isPathValid ? 'red' : 'green'}
             text={
-              !isPathValid &&
-              isExtensionActive &&
-              'В поле "Путь" должно быть не менее 5 символов'
+              !isPathValid && isExtensionActive
+                ? 'В поле "Путь" должно быть не менее 5 символов'
+                : 'Активировать перехват'
             }
           >
             <Checkbox

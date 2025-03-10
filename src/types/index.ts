@@ -30,6 +30,15 @@ export interface Rule {
 }
 
 /*
+ * Интерфейс для описания состояния хранения правил.
+ * Применяется нормализованная структура данных для сущностей
+ */
+export interface RulesState {
+  entities: Record<string, Rule>;
+  ruleIds: string[];
+}
+
+/*
  * Интерфейс для сообщений, отправляемых между popup и background.
  */
 export interface ExtensionMessage {

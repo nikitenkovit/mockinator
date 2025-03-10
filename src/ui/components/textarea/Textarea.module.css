@@ -4,6 +4,12 @@
   resize: none;
   border-radius: 8px;
   background-color: var(--white-color);
+  transition: 0.4s;
+  outline: 1px solid var(--secondary-them-color);
+
+  &:hover {
+    outline: 1px solid var(--black-color);
+  }
 
   &:focus,
   &:active {
