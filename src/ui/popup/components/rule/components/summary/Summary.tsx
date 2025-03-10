@@ -1,4 +1,5 @@
-import { AcceptModal, Checkbox, Hint, LineInput } from '@/ui/components';
+import { MapMethodToBadgeColorText } from '@/constants';
+import { AcceptModal, Badge, Checkbox, Hint, LineInput } from '@/ui/components';
 import { useBoolean } from '@/ui/hooks';
 import classNames from 'classnames';
 import React from 'react';
@@ -63,6 +64,9 @@ export const Summary = (props: SummaryProps) => {
             width="524px"
             disabled={!isExtensionActive}
           />
+          <Badge color={MapMethodToBadgeColorText[rule.method]}>
+            {rule.method}
+          </Badge>
         </div>
 
         <div className={styles.summaryTools}>

@@ -45,7 +45,7 @@ export const Popup: React.FC = () => {
       />
 
       <section className={styles.content}>
-        {true && <div className={styles.error}>Ошибка: {error}</div>}
+        {error && <div className={styles.error}>Ошибка: {error}</div>}
 
         <ul>
           {rulesState.ruleIds.map((ruleId) => (

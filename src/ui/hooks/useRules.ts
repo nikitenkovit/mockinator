@@ -2,10 +2,10 @@ import { ResponseSuccessTypeEnum, ResponseTypeEnum } from '@/constants';
 import { Rule, RulesState } from '@/types';
 import { useCallback, useEffect, useState } from 'react';
 
-/*
+/**
  * Кастомный хук для управления правилами перехвата запросов.
  * Возвращает:
- * - rulesState: Нормализованная структура данных для сущностей правил
+ * - rulesState: Состояние правил (entities и ruleIds).
  * - addRule: Функция для добавления нового правила.
  * - deleteRule: Функция для удаления правила.
  * - updateRule: Функция для обновления отдельного правила.
@@ -104,26 +104,9 @@ export const useRules = (setError: (error: string) => void) => {
   );
 
   const resetState = useCallback(() => {
-    const initialRule: Rule = {
-      id: Date.now().toString(),
-      name: '',
-      method: 'GET',
-      path: '',
-      data: '{"title": "Пример JSON ответа"}',
-      isActive: false,
-      delay: 0,
-      responseType: ResponseTypeEnum.Success,
-      successResponseType: ResponseSuccessTypeEnum.JSON,
-      errorResponse: JSON.stringify({
-        error: 'Bad Request',
-        message: 'Invalid data',
-      }),
-      redirectUrl: 'http://',
-    };
-
     const newRulesState: RulesState = {
-      entities: { [initialRule.id]: initialRule },
-      ruleIds: [initialRule.id],
+      entities: {},
+      ruleIds: [],
     };
 
     setRulesState(newRulesState);
