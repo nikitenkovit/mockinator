@@ -60,7 +60,7 @@ export const Summary = (props: SummaryProps) => {
             type="text"
             value={rule.path}
             onChange={(e) => onUpdateRule(rule.id, 'path', e.target.value)}
-            placeholder={rule.name || 'Путь. Например: example/path'}
+            placeholder={rule.name || 'Путь. Например: /api/data'}
             width="524px"
             disabled={!isExtensionActive}
           />
@@ -71,11 +71,11 @@ export const Summary = (props: SummaryProps) => {
 
         <div className={styles.summaryTools}>
           <Hint
-            variant="red"
+            variant={!isPathValid ? 'red' : 'green'}
             text={
-              !isPathValid &&
-              isExtensionActive &&
-              'В поле "Путь" должно быть не менее 5 символов'
+              !isPathValid && isExtensionActive
+                ? 'В поле "Путь" должно быть не менее 5 символов'
+                : 'Активировать перехват'
             }
           >
             <Checkbox
