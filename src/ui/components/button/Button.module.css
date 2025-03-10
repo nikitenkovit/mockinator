@@ -19,3 +19,13 @@
   background-color: var(--primary-accent-color);
   color: var(--white-color);
 }
+
+.disabled {
+  border: 1px solid var(--secondary-them-color);
+
+  &:hover,
+  &:focus {
+    background-color: transparent;
+    color: var(--black-color);
+  }
+}

@@ -16,11 +16,12 @@
   }
 }
 
-/* Все что ниже перебрать и удалить */
-
 .error {
-  color: #dc3545;
+  margin: 16px 16px 0;
+  color: var(--danger-color);
   font-size: 14px;
   margin-bottom: 16px;
   text-align: center;
+  border: 1px solid var(--danger-color);
+  border-radius: 8px;
 }

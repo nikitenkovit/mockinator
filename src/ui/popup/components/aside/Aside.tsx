@@ -1,4 +1,4 @@
-import { Button, Modal } from '@/ui/components';
+import { Button, Hint, Modal } from '@/ui/components';
 import { useBoolean } from '@/ui/hooks';
 import classNames from 'classnames';
 import React from 'react';
@@ -7,7 +7,13 @@ import { AsideProps } from './Aside.type';
 import { About } from './components';
 
 export const Aside = React.memo(
-  ({ onImportRules, onExportRules, visible, onVisibleChange }: AsideProps) => {
+  ({
+    onImportRules,
+    onExportRules,
+    visible,
+    onVisibleChange,
+    rulesState,
+  }: AsideProps) => {
     const [isModalOpen, setIsModalOpen] = useBoolean(false);
 
     const importHandler = () => {
@@ -22,6 +28,8 @@ export const Aside = React.memo(
       };
       input.click();
     };
+
+    const isExportButtonDisabled = rulesState.ruleIds.length === 0;
 
     return (
       <>
@@ -44,8 +52,19 @@ export const Aside = React.memo(
           </div>
 
           <div className={styles.tools}>
+            <Hint
+              text={
+                isExportButtonDisabled
+                  ? 'Добавьте хотя бы одно правило'
+                  : undefined
+              }
+              variant="red"
+            >
+              <Button onClick={onExportRules} disabled={isExportButtonDisabled}>
+                Экспорт правил
+              </Button>
+            </Hint>
             <Button onClick={importHandler}>Импорт правил</Button>
-            <Button onClick={onExportRules}>Экспорт правил</Button>
             <Button onClick={() => setIsModalOpen.on()}>Справка</Button>
           </div>
         </aside>

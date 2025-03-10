@@ -1,19 +1,18 @@
-import { Rule } from '@/types';
+import { RulesState } from '@/types';
 import { useEffect, useState } from 'react';
 
 /**
  * Хук для управления состоянием расширения.
  * @param setError - Функция для установки ошибки.
- * @param rules - Массив правил.
+ * @param rulesState - Состояние правил.
  * @returns Объект с состоянием и функцией для переключения состояния.
  */
 export const useExtensionState = (
   setError: (error: string) => void,
-  rules: Rule[],
+  rulesState: RulesState,
 ) => {
   const [isExtensionActive, setIsExtensionActive] = useState(false);
 
-  // Загрузка состояния расширения из хранилища при монтировании компонента
   useEffect(() => {
     chrome.storage.local.get(['isExtensionActive'], (result) => {
       if (chrome.runtime.lastError) {
@@ -29,13 +28,11 @@ export const useExtensionState = (
     });
   }, []);
 
-  // Переключение состояния расширения
   const toggleExtension = async () => {
     const newIsExtensionActive = !isExtensionActive;
     setIsExtensionActive(newIsExtensionActive);
 
     try {
-      // Сохраняем состояние расширения в хранилище
       chrome.storage.local.set(
         { isExtensionActive: newIsExtensionActive },
         () => {
@@ -46,12 +43,11 @@ export const useExtensionState = (
             return;
           }
 
-          // Отправляем сообщение в фоновый скрипт
           chrome.runtime.sendMessage({
             action: newIsExtensionActive
               ? 'activateExtension'
               : 'deactivateExtension',
-            rules,
+            rules: rulesState,
           });
         },
       );
