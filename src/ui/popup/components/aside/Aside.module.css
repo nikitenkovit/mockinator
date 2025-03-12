@@ -25,6 +25,13 @@
   width: 100%;
   height: 100%;
   background-color: var(--backdrop-background-color);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.backdropVisible {
+  opacity: 1;
   z-index: 9;
 }
 

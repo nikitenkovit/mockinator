@@ -2,6 +2,10 @@
   position: relative;
 }
 
+.disabled {
+  pointer-events: none;
+}
+
 .container:hover .hint {
   display: block;
 }

@@ -33,9 +33,12 @@ export const Aside = React.memo(
 
     return (
       <>
-        {visible && (
-          <div className={styles.backdrop} onClick={onVisibleChange} />
-        )}
+        <div
+          className={classNames(styles.backdrop, {
+            [styles.backdropVisible]: visible,
+          })}
+          onClick={onVisibleChange}
+        />
         {isModalOpen && (
           <Modal onClose={() => setIsModalOpen.off()}>
             <About />
