@@ -7,6 +7,7 @@ interface IProps {
   width?: string;
   placement?: 'top' | 'bottom';
   variant?: 'green' | 'red';
+  disabled?: boolean;
 }
 
 export const Hint = ({
@@ -15,9 +16,12 @@ export const Hint = ({
   width,
   placement = 'bottom',
   variant = 'green',
+  disabled = false,
 }: IProps) => {
   return (
-    <div className={styles.container}>
+    <div
+      className={classNames(styles.container, { [styles.disabled]: disabled })}
+    >
       {text && (
         <div
           className={classNames(

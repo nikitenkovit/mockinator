@@ -8,4 +8,5 @@
   border: 1px solid rgba(103, 103, 120, 0.3);
   border-radius: 4px;
   background-color: rgba(103, 103, 120, 0.1);
+  pointer-events: none;
 }

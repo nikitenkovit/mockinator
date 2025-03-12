@@ -71,9 +71,10 @@ export const Summary = (props: SummaryProps) => {
 
         <div className={styles.summaryTools}>
           <Hint
+            disabled={!isExtensionActive}
             variant={!isPathValid ? 'red' : 'green'}
             text={
-              !isPathValid && isExtensionActive
+              !isPathValid
                 ? 'В поле "Путь" должно быть не менее 5 символов'
                 : 'Активировать перехват'
             }
