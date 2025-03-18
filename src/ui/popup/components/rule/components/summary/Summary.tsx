@@ -2,7 +2,7 @@ import { MapMethodToBadgeColorText } from '@/constants';
 import { AcceptModal, Badge, Checkbox, Hint, LineInput } from '@/ui/components';
 import { useBoolean } from '@/ui/hooks';
 import classNames from 'classnames';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { MdOutlineDeleteForever } from 'react-icons/md';
 import styles from './Summary.module.css';
@@ -36,6 +36,12 @@ export const Summary = (props: SummaryProps) => {
     onDeleteRule(rule.id);
     setAcceptModalVisible.off();
   };
+
+  useEffect(() => {
+    if (!isPathValid) {
+      onUpdateRule(rule.id, 'isActive', false);
+    }
+  }, [isPathValid]);
 
   return (
     <summary onClick={summaryClickHandler}>
